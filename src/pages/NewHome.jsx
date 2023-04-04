@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { faRadio, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
-
-import { Link } from 'react-router-dom'
 
 import P5Wrapper from "react-p5-wrapper";
 import "./NewHome.css";

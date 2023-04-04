@@ -1,18 +1,14 @@
 
-function lerp(start: number, end: number, t: number) {
-	return (1 - t) * start + t * end;
-}
-
 function clamp(val: number, min: number, max: number) {
 	return Math.max(Math.min(val, max), min);
 }
 
-function gaussianRandom(stdev=1) {
-    let u = 1 - Math.random(); // Converting [0,1) to (0,1]
-    let v = Math.random();
-    let z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-    // Transform to the desired mean and standard deviation:
-    return z * stdev;
+function gaussianRandom(stdev = 1) {
+	let u = 1 - Math.random(); // Converting [0,1) to (0,1]
+	let v = Math.random();
+	let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+	// Transform to the desired mean and standard deviation:
+	return z * stdev;
 }
 
 class Layer {
@@ -74,7 +70,7 @@ class Layer {
 	}
 
 	forward(input: Float32Array): Float32Array {
-		if(input.length !== this.weights[0].length)
+		if (input.length !== this.weights[0].length)
 			throw new Error("input size mismatch!");
 		let output = new Float32Array(this.biases.length);
 
@@ -112,8 +108,8 @@ class NodeLogic {
 
 		let numTotalIn = 1;
 		let numTotalOut = 2;
-		
-		let lastOut = numTotalIn; 
+
+		let lastOut = numTotalIn;
 		for (let i = 1; i <= numLayer; i++) {
 			let newOut = i === numLayer ? numTotalOut : 6;
 			layers.push(Layer.rand(lastOut, newOut));
@@ -138,9 +134,9 @@ class NodeLogic {
 		return new NodeLogic(
 			nl,
 			l1.mutationRate *
-				(1 + (Math.random() * 2 - 1) * 0.05),
+			(1 + (Math.random() * 2 - 1) * 0.05),
 			l1.mutationPrevalence *
-				(1 + (Math.random() * 2 - 1) * 0.05)
+			(1 + (Math.random() * 2 - 1) * 0.05)
 		);
 	}
 
@@ -150,7 +146,7 @@ class NodeLogic {
 		//let inp = new Float32Array(this.lastOutput.length);
 		//inp.set(defInp);
 		//inp.set(this.lastOutput.subarray(defInp.length), defInp.length);
-		
+
 		for (let i = 0; i < this.layers.length; i++)
 			inp = this.layers[i].forward(inp);
 
