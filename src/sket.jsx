@@ -53,21 +53,11 @@ export default function sketch(p) {
 
 		p.noStroke();
 
-		let locX = (p.mouseX / p.width - 0.5) * -5;
-		let locY = (p.mouseY / p.height - 0.5) * -5;
-
 		//let mX = p.mouseX - p.width * 0.5;
 		//let mY = p.mouseY - p.height * 0.5;
 
 		p.ambientLight(pulse * 100, pulse * 100, pulse * 100);
-		p.directionalLight(
-			255 * pulse,
-			255 * pulse,
-			255 * pulse,
-			locX,
-			locY,
-			1
-		);
+		
 		//p.lightFalloff(0.9, 0.001, 0);
 
 		p.fill(255);
