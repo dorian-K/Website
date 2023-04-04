@@ -1,4 +1,4 @@
-import P5Wrapper from "react-p5-wrapper";
+import { ReactP5Wrapper } from "react-p5-wrapper";
 import NodeManager from "./logic/NodeManager";
 import { Mutex } from "async-mutex";
 
@@ -136,7 +136,7 @@ function drawFunc(p) {
 export default function GeneticSim(props) {
 	return (
 		<div className="anim">
-			<P5Wrapper sketch={drawFunc} expression={props.expression} />
+			<ReactP5Wrapper sketch={drawFunc} expression={props.expression} />
 		</div>
 	);
 }

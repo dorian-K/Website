@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
-import P5Wrapper from "react-p5-wrapper";
+import { ReactP5Wrapper } from "react-p5-wrapper";
 import "./NewHome.css";
-import sketch from "../sket";
+import { sketch } from "../sket";
 
 function BgComponent(props) {
 	return (
 		<div className="anim">
-			<P5Wrapper sketch={sketch} expression={props.expression} />
+			<ReactP5Wrapper sketch={sketch} expression={props.expression} />
 		</div>
 	);
 }
