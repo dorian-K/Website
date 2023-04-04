@@ -62,8 +62,9 @@ class NodeManager {
 			return new LivingNode(baseLogic, this.bounds, randomPos);
 
 		// mutate and drop back in
-		
-		if (Math.random() < 0.5) {
+		let mutated = NodeLogic.mutate(baseLogic);
+		return new LivingNode(mutated, this.bounds, randomPos);
+		/*if (Math.random() < 0.5) {
 			let myLogic = baseLogic;
 			if(Math.random() < 0.3){
 				// cross with random
@@ -88,7 +89,7 @@ class NodeManager {
 			let lerpedLogic = NodeLogic.lerpLogic(baseLogic, other, 0.5);
 			let mutated = NodeLogic.mutate(lerpedLogic);
 			return new LivingNode(mutated, this.bounds, randomPos);
-		}
+		}*/
 	}
 
 	async tick() {

@@ -86,8 +86,6 @@ function drawFunc(p) {
 			);
 			p.text(
 				"Top Rates: " +
-					nodeMgr.replacementCandidates[0].logic.lerpRate.toFixed(4) +
-					" " +
 					nodeMgr.replacementCandidates[0].logic.mutationRate.toFixed(
 						4
 					) +
@@ -99,23 +97,18 @@ function drawFunc(p) {
 				window.innerWidth / 2,
 				90
 			);
-			let avgLerp = 0;
 			let avgMut = 0;
 			let avgPrev = 0;
 			nodeMgr.replacementCandidates.forEach((e) => {
-				avgLerp += e.logic.lerpRate;
 				avgMut += e.logic.mutationRate;
 				avgPrev += e.logic.mutationPrevalence;
 			});
 
-			avgLerp /= nodeMgr.replacementCandidates.length;
 			avgMut /= nodeMgr.replacementCandidates.length;
 			avgPrev /= nodeMgr.replacementCandidates.length;
 
 			p.text(
 				"Avg Rates: " +
-					avgLerp.toFixed(4) +
-					" " +
 					avgMut.toFixed(4) +
 					" " +
 					avgPrev.toFixed(4) +

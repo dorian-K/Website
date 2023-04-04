@@ -7,6 +7,14 @@ function clamp(val: number, min: number, max: number) {
 	return Math.max(Math.min(val, max), min);
 }
 
+function gaussianRandom(stdev=1) {
+    let u = 1 - Math.random(); // Converting [0,1) to (0,1]
+    let v = Math.random();
+    let z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    // Transform to the desired mean and standard deviation:
+    return z * stdev;
+}
+
 class Layer {
 	weights: Array<Float32Array>;
 	biases: Float32Array;
@@ -30,25 +38,10 @@ class Layer {
 				a[b] = boundary * (Math.random() * 2 - 1);
 			w[i] = a;
 
-			b[i] = 0.5 * (Math.random() * 2 - 1);
+			b[i] = 0;
 		}
 
 		return new Layer(w, b);
-	}
-
-	static lerpLayers(l1: Layer, l2: Layer, t: number) {
-		const nw = new Array(l1.weights.length);
-		const nb = new Float32Array(l1.biases.length);
-
-		for (let i = 0; i < nw.length; i++) {
-			let a = new Float32Array(l1.weights[0].length);
-			for (let b = 0; b < a.length; b++)
-				a[b] = lerp(l1.weights[i][b], l2.weights[i][b], t);
-			nw[i] = a;
-
-			nb[i] = lerp(l1.biases[i], l2.biases[i], t);
-		}
-		return new Layer(nw, nb);
 	}
 
 	static mutate(
@@ -100,53 +93,36 @@ class NodeLogic {
 	layers: Array<Layer>;
 	mutationRate: number;
 	mutationPrevalence: number;
-	lerpRate: number;
 	lastOutput: Float32Array;
 
 	constructor(
 		layers: Array<Layer>,
 		mutationRate: number,
-		lerpRate: number,
 		mutationPrevalence: number
 	) {
 		this.layers = layers;
-		this.mutationRate = clamp(mutationRate, 0.001, 0.1);
-		this.mutationPrevalence = clamp(mutationPrevalence, 0.01, 2);
-		this.lerpRate = clamp(lerpRate, 0.00001, 0.2);
+		this.mutationRate = clamp(mutationRate, 0.001, 0.5);
+		this.mutationPrevalence = clamp(mutationPrevalence, 0.01, 1);
 		this.lastOutput = new Float32Array(this.layers[this.layers.length - 1].biases.length);
 	}
 
 	static rand(): NodeLogic {
 		let layers = [];
-		let numLayer = 4;
+		let numLayer = 5;
 
 		let numTotalIn = 1;
 		let numTotalOut = 2;
 		
 		let lastOut = numTotalIn; 
 		for (let i = 1; i <= numLayer; i++) {
-			let newOut = i === numLayer ? numTotalOut : 10;
+			let newOut = i === numLayer ? numTotalOut : 6;
 			layers.push(Layer.rand(lastOut, newOut));
 			lastOut = newOut;
 		}
 		return new NodeLogic(
 			layers,
-			Math.random() * 0.1,
-			Math.random() * 0.1,
-			Math.random() * 1.2
-		);
-	}
-
-	static lerpLogic(l1: NodeLogic, l2: NodeLogic, t: number) {
-		let nl = new Array(l1.layers.length);
-		for (let i = 0; i < nl.length; i++)
-			nl[i] = Layer.lerpLayers(l1.layers[i], l2.layers[i], t);
-
-		return new NodeLogic(
-			nl,
-			lerp(l1.mutationRate, l2.mutationRate, t),
-			lerp(l1.lerpRate, l2.lerpRate, t),
-			lerp(l1.mutationPrevalence, l2.mutationPrevalence, t)
+			Math.random() * 0.5,
+			Math.random() * 0.3
 		);
 	}
 
@@ -162,11 +138,9 @@ class NodeLogic {
 		return new NodeLogic(
 			nl,
 			l1.mutationRate *
-				(1 + (Math.random() * 2 - 1) * l1.mutationRate * 0.05),
-			l1.lerpRate *
-				(1 + (Math.random() * 2 - 1) * l1.mutationRate * 0.05),
+				(1 + (Math.random() * 2 - 1) * 0.05),
 			l1.mutationPrevalence *
-				(1 + (Math.random() * 2 - 1) * l1.mutationRate * 0.05)
+				(1 + (Math.random() * 2 - 1) * 0.05)
 		);
 	}
 
