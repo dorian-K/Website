@@ -1,0 +1,26 @@
+#nametext {
+	font-size: 6em;
+	font-family: "Roboto Mono", monospace;
+	animation: fadein 5s ease-in-out;
+	margin-top: 1vh;
+	margin-bottom: 0.1em;
+	color: white;
+}
+
+.porticon {
+	color: white;
+	font-size: 2em;
+	animation: fadein 5s ease-in-out;
+}
+
+.inpanim {
+	animation: fadein 5s ease-in-out;
+}
+
+#text {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+
+	text-align: center;
+}
