@@ -32,28 +32,23 @@ class LivingNode {
 		let dx = this.posX - targetPos.x;
 		let dy = this.posY - targetPos.y;
 		const action = this.logic.step([
-			Math.atan2(dy, dx) /
-				Math.PI,
-			//Math.abs(dx) / Math.abs(this.bounds.x),
-			//Math.abs(dy) / Math.abs(this.bounds.y),
-			//Math.sqrt(dx * dx + dy * dy) / Math.sqrt(this.bounds.x * this.bounds.x + this.bounds.y * this.bounds.y)
-			//Math.sign((this.posX - targetPos.x) / this.bounds.x),
-			//Math.sign((this.posY - targetPos.y) / this.bounds.y),
+			dx, dy
 		]);
 		//console.log(action[0], " ", action[1]);
 		// action is an array with 2 values: x and y movement
 		let dist = Math.sqrt(action[0] * action[0] + action[1] * action[1]);
 		this.distanceMoved += dist;
 
-		//if (dist > 0.01) {
+		if (dist > 1) {
+			action[0] /= dist;
+			action[1] /= dist;
+		}
 		this.posX += clamp(action[0], -1, 1) * 2;
 		this.posY += clamp(action[1], -1, 1) * 2;
 		this.snapBounds();
-		//}
 
-		if(this.health % 10 === 0){
-			
-			let dist = Math.sqrt(dx*dx+dy*dy);
+		if (this.health % 10 === 0) {
+			let dist = Math.sqrt(dx * dx + dy * dy);
 			let maxDist = Math.sqrt(
 				this.bounds.x * this.bounds.x + this.bounds.y * this.bounds.y
 			);

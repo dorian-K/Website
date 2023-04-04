@@ -3,23 +3,32 @@ import "./App.css";
 import Portfolio from "./Home";
 import Acceptor from "../experiments/redirector/Acceptor";
 import Sender from "../experiments/redirector/Sender";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
 import GeneticSim from "../experiments/genetics/GeneticSim";
 import NewHome from "./NewHome";
+import React from "react";
 
 function App() {
 	return (
 		<>
-			<Router>
-				<Switch>
-					<Route path="/newhome" exact component={() => <NewHome />} />
-					<Route path="/" exact component={() => <Portfolio />} />
-					<Route path="/a" exact component={() => <Acceptor />} />
-					<Route path="/b" exact component={() => <Sender />} />
-					<Route path="/g" exact component={() => <GeneticSim />} />
-				</Switch>
-			</Router>
+			<BrowserRouter>
+				<Routes>
+					<Route path="/g" element={<GeneticSim />} />
+					<Route path="/newhome" element={<Strict><NewHome /></Strict>} />
+					<Route path="/" element={<Strict><Portfolio /></Strict>} />
+					<Route path="/a" element={<Strict><Acceptor /></Strict>} />
+					<Route path="/b" element={<Strict><Sender /></Strict>} />
+				</Routes>
+			</BrowserRouter>
 		</>
+	);
+}
+
+function Strict(props){
+	return (
+		<React.StrictMode>
+			<Outlet />
+		</React.StrictMode>
 	);
 }
 

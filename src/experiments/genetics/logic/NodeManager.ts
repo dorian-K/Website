@@ -58,8 +58,8 @@ class NodeManager {
 		}
 
 		if (this.replacementCandidates[i].numUsed === 1)
-			// copy original
-			return new LivingNode(baseLogic, this.bounds, randomPos);
+			// copy original, but mutate parameters
+			return new LivingNode(NodeLogic.mutateParameters(baseLogic), this.bounds, randomPos);
 
 		// mutate and drop back in
 		let mutated = NodeLogic.mutate(baseLogic);
@@ -94,7 +94,7 @@ class NodeManager {
 
 	async tick() {
 		this.findNewTargetTimeout--;
-		if(this.findNewTargetTimeout <= 0){
+		if (this.findNewTargetTimeout <= 0) {
 			this.findNewTargetTimeout = 340;
 			this.targetPos.x = (Math.random() * 0.8 + 0.1) * this.bounds.x;
 			this.targetPos.y = (Math.random() * 0.8 + 0.1) * this.bounds.y;
@@ -161,7 +161,20 @@ class NodeManager {
 			}
 		}
 
-		console.log("Avg fitness: "+ (this.totalFitness / this.replacementCandidates.length));
+		{
+			let avgMut = 0;
+			let avgPrev = 0;
+			this.replacementCandidates.forEach((e) => {
+				avgMut += e.logic.mutationRate;
+				avgPrev += e.logic.mutationPrevalence;
+			});
+
+			avgMut /= this.replacementCandidates.length;
+			avgPrev /= this.replacementCandidates.length;
+
+			console.log("Avg fitness: " + (this.totalFitness / this.replacementCandidates.length));
+			console.log("Avg mutationRate: " + avgMut + " \tmutationPrevalence: " + avgPrev);
+		}
 
 		for (let i = 0; i < this.nodes.length; i++)
 			this.nodes[i] = this.constructNewNode();

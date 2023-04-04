@@ -53,20 +53,23 @@ class Layer {
 			for (let b = 0; b < a.length; b++) {
 				a[b] = n.weights[i][b];
 				if (Math.random() < mutationPrevalence)
-					a[b] += (Math.random() * 2 - 1) * mutationRate;
+					a[b] += gaussianRandom(mutationRate);
 			}
 
 			nw[i] = a;
 
 			if (Math.random() < mutationPrevalence * n.weights[0].length)
-				nb[i] = n.biases[i] + (Math.random() * 2 - 1) * mutationRate;
+				nb[i] = n.biases[i] + gaussianRandom(mutationRate);
 		}
 		return new Layer(nw, nb);
 	}
 
 	activation(x: number): number {
-		return Math.tanh(x);
-		//return x;
+
+		if (x < 0)
+			return x * 0.1;
+		return x;
+		//return Math.tanh(x);
 	}
 
 	forward(input: Float32Array): Float32Array {
@@ -104,9 +107,8 @@ class NodeLogic {
 
 	static rand(): NodeLogic {
 		let layers = [];
-		let numLayer = 5;
-
-		let numTotalIn = 1;
+		let numLayer = 3
+		let numTotalIn = 2;
 		let numTotalOut = 2;
 
 		let lastOut = numTotalIn;
@@ -134,18 +136,26 @@ class NodeLogic {
 		return new NodeLogic(
 			nl,
 			l1.mutationRate *
-			(1 + (Math.random() * 2 - 1) * 0.05),
+			(1 + gaussianRandom(0.05)),
 			l1.mutationPrevalence *
-			(1 + (Math.random() * 2 - 1) * 0.05)
+			(1 + gaussianRandom(0.05))
+		);
+	}
+
+	static mutateParameters(l1: NodeLogic) {
+		return new NodeLogic(
+			l1.layers,
+			l1.mutationRate *
+			(1 + gaussianRandom(0.05)),
+			l1.mutationPrevalence *
+			(1 + gaussianRandom(0.05))
 		);
 	}
 
 	step(obj: Array<number>): Float32Array {
+
 		let defInp = new Float32Array(obj);
 		let inp = defInp;
-		//let inp = new Float32Array(this.lastOutput.length);
-		//inp.set(defInp);
-		//inp.set(this.lastOutput.subarray(defInp.length), defInp.length);
 
 		for (let i = 0; i < this.layers.length; i++)
 			inp = this.layers[i].forward(inp);
