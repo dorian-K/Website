@@ -44,7 +44,7 @@ function drawFunc(p: P5CanvasInstance<SketchProps>) {
 
 	p.draw = () => {
 		// let fCount = Math.max(1, p.frameCount - firstFrame - 5);
-
+		p.noStroke();
 		p.background(0);
 		p.fill(200);
 		p.textSize(32);
@@ -105,10 +105,6 @@ function drawFunc(p: P5CanvasInstance<SketchProps>) {
 			);
 		}
 
-		p.noFill();
-		p.stroke(255, 50, 50);
-		p.strokeWeight(5);
-		p.circle(nodeMgr.targetPos.x * simScale, nodeMgr.targetPos.y * simScale, 20);
 		//nodeMgr.targetPos.x = locX;
 		//nodeMgr.targetPos.y = locY;
 
@@ -118,6 +114,12 @@ function drawFunc(p: P5CanvasInstance<SketchProps>) {
 		lastNodeList.forEach((e) => {
 			p.circle(e.posX * simScale, e.posY * simScale, 5);
 		});
+
+		p.noFill();
+		p.stroke(255, 50, 50);
+		p.strokeWeight(5);
+		p.circle(nodeMgr.targetPos.x * simScale, nodeMgr.targetPos.y * simScale, 20);
+		
 	};
 }
 

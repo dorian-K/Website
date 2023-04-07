@@ -3,7 +3,7 @@ import "./App.css";
 import Portfolio from "./Home";
 import Acceptor from "../experiments/redirector/Acceptor";
 import Sender from "../experiments/redirector/Sender";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import GeneticSim from "../experiments/genetics/GeneticSim";
 import NewHome from "./NewHome";
 import React from "react";

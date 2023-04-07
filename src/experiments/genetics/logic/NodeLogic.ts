@@ -11,6 +11,8 @@ function gaussianRandom(stdev = 1) {
 	return z * stdev;
 }
 
+const LN_2 = Math.log(2);
+
 class Layer {
 	weights: Array<Float32Array>;
 	biases: Float32Array;
@@ -70,12 +72,12 @@ class Layer {
 	}
 
 	activation(x: number): number {
-
-		/*if (x < 0)
-			return x * 0.1;
-		return x;*/
-		//return Math.tanh(x);
+		// gelu
+		//return 0.5 * x * (1 + Math.tanh(Math.sqrt(2/Math.PI) * (x * (1 + 0.044715 * x * x))));
+		// softplus
+		//return Math.log(1 + Math.exp(x)) / LN_2 - 1;
 		return Math.tanh(x);
+		//return Math.tanh(x);
 	}
 
 	forward(input: Float32Array): Float32Array {
@@ -128,7 +130,7 @@ class NodeLogic {
 		}
 		return new NodeLogic(
 			layers,
-			Math.random() * 2 * 0.15,
+			Math.random() * 2 * 0.2,
 			Math.random() * 2 * 12,
 			Math.random() * 2 * 3
 		);
@@ -158,7 +160,7 @@ class NodeLogic {
 			l1.mutationRate *
 			(1 + gaussianRandom(0.025)),
 			l1.expectedWeightMutations *
-			(1 + gaussianRandom(0.5)),
+			(1 + gaussianRandom(0.1)),
 			l1.expectedBiasMutations *
 			(1 + gaussianRandom(0.1))
 		);
