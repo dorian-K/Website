@@ -27,7 +27,7 @@ function App() {
 function Strict(props){
 	return (
 		<React.StrictMode>
-			<Outlet />
+			{props.children}
 		</React.StrictMode>
 	);
 }

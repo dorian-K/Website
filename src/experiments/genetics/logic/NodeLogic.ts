@@ -43,22 +43,27 @@ class Layer {
 	static mutate(
 		n: Layer,
 		mutationRate: number,
-		mutationPrevalence: number
+		expectedWeightMutations: number,
+		expectedBiasMutations: number
 	): Layer {
 		const nw = new Array(n.weights.length);
 		const nb = new Float32Array(n.biases.length);
+		
+		const totalWeights = n.weights.length * n.weights[0].length;
+		const weightMutPrevalence = expectedWeightMutations / totalWeights;
+		const biasMutPrevalence = expectedBiasMutations / n.biases.length;
 
 		for (let i = 0; i < nw.length; i++) {
 			let a = new Float32Array(n.weights[0].length);
 			for (let b = 0; b < a.length; b++) {
 				a[b] = n.weights[i][b];
-				if (Math.random() < mutationPrevalence)
+				if (Math.random() < weightMutPrevalence)
 					a[b] += gaussianRandom(mutationRate);
 			}
 
 			nw[i] = a;
 
-			if (Math.random() < mutationPrevalence * n.weights[0].length)
+			if (Math.random() < biasMutPrevalence)
 				nb[i] = n.biases[i] + gaussianRandom(mutationRate);
 		}
 		return new Layer(nw, nb);
@@ -66,10 +71,11 @@ class Layer {
 
 	activation(x: number): number {
 
-		if (x < 0)
+		/*if (x < 0)
 			return x * 0.1;
-		return x;
+		return x;*/
 		//return Math.tanh(x);
+		return Math.tanh(x);
 	}
 
 	forward(input: Float32Array): Float32Array {
@@ -91,24 +97,27 @@ class Layer {
 class NodeLogic {
 	layers: Array<Layer>;
 	mutationRate: number;
-	mutationPrevalence: number;
+	expectedWeightMutations: number;
+	expectedBiasMutations: number;
 	lastOutput: Float32Array;
 
 	constructor(
 		layers: Array<Layer>,
 		mutationRate: number,
-		mutationPrevalence: number
+		expectedWeightMutations: number,
+		expectedBiasMutations: number
 	) {
 		this.layers = layers;
 		this.mutationRate = clamp(mutationRate, 0.001, 0.5);
-		this.mutationPrevalence = clamp(mutationPrevalence, 0.01, 1);
+		this.expectedWeightMutations = clamp(expectedWeightMutations, 0.01, 999999);
+		this.expectedBiasMutations = clamp(expectedBiasMutations, 0.01, 999999);
 		this.lastOutput = new Float32Array(this.layers[this.layers.length - 1].biases.length);
 	}
 
 	static rand(): NodeLogic {
 		let layers = [];
-		let numLayer = 3
-		let numTotalIn = 2;
+		let numLayer = 4
+		let numTotalIn = 4;
 		let numTotalOut = 2;
 
 		let lastOut = numTotalIn;
@@ -119,8 +128,9 @@ class NodeLogic {
 		}
 		return new NodeLogic(
 			layers,
-			Math.random() * 0.5,
-			Math.random() * 0.3
+			Math.random() * 2 * 0.15,
+			Math.random() * 2 * 12,
+			Math.random() * 2 * 3
 		);
 	}
 
@@ -130,25 +140,27 @@ class NodeLogic {
 			nl[i] = Layer.mutate(
 				l1.layers[i],
 				l1.mutationRate,
-				l1.mutationPrevalence
+				l1.expectedWeightMutations / nl.length,
+				l1.expectedBiasMutations / nl.length
 			);
 
-		return new NodeLogic(
+		return this.mutateParameters(new NodeLogic(
 			nl,
-			l1.mutationRate *
-			(1 + gaussianRandom(0.05)),
-			l1.mutationPrevalence *
-			(1 + gaussianRandom(0.05))
-		);
+			l1.mutationRate,
+			l1.expectedWeightMutations,
+			l1.expectedBiasMutations
+		));
 	}
 
 	static mutateParameters(l1: NodeLogic) {
 		return new NodeLogic(
 			l1.layers,
 			l1.mutationRate *
-			(1 + gaussianRandom(0.05)),
-			l1.mutationPrevalence *
-			(1 + gaussianRandom(0.05))
+			(1 + gaussianRandom(0.025)),
+			l1.expectedWeightMutations *
+			(1 + gaussianRandom(0.5)),
+			l1.expectedBiasMutations *
+			(1 + gaussianRandom(0.1))
 		);
 	}
 

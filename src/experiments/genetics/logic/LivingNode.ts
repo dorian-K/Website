@@ -18,7 +18,7 @@ class LivingNode {
 		bounds: { x: number; y: number },
 		pos: { x: number; y: number }
 	) {
-		this.health = 1000;
+		this.health = 1400;
 		this.posX = pos.x;
 		this.posY = pos.y;
 		this.logic = logic;
@@ -32,7 +32,8 @@ class LivingNode {
 		let dx = this.posX - targetPos.x;
 		let dy = this.posY - targetPos.y;
 		const action = this.logic.step([
-			dx, dy
+			this.posX / (this.bounds.x * 0.5) - 1, this.posY / (this.bounds.y * 0.5) - 1,
+			targetPos.x / (this.bounds.x * 0.5) - 1, targetPos.y / (this.bounds.y * 0.5) - 1
 		]);
 		//console.log(action[0], " ", action[1]);
 		// action is an array with 2 values: x and y movement
@@ -64,7 +65,7 @@ class LivingNode {
 	}
 
 	endEpisode() {
-		if (this.distanceMoved < 10) this.reward -= 1000;
+		//if (this.distanceMoved < 10) this.reward -= 1000;
 	}
 
 	isDead() {
@@ -83,7 +84,7 @@ class LivingNode {
 
 		if (valid !== 2) {
 			//this.health = 0;
-			this.reward -= 0.5;
+			//this.reward -= 0.5;
 		}
 	}
 }

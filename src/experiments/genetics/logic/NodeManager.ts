@@ -9,7 +9,7 @@ class NodeManager {
 		numUsed: number;
 	}>;
 	totalFitness = 0;
-	maxUseCount = 50;
+	maxUseCount = 30;
 	numReplacementCandidates = 500;
 	numInitialNodes = 1000;
 	bounds: { x: number; y: number };
@@ -50,7 +50,7 @@ class NodeManager {
 		this.replacementCandidates[i].numUsed += 1;
 		if (
 			this.replacementCandidates[i].numUsed > this.maxUseCount &&
-			this.replacementCandidates.length >= this.numReplacementCandidates
+			this.replacementCandidates.length >= this.numReplacementCandidates / 2
 		) {
 			// remove from list
 			this.totalFitness -= this.replacementCandidates[i].fit;
@@ -64,40 +64,22 @@ class NodeManager {
 		// mutate and drop back in
 		let mutated = NodeLogic.mutate(baseLogic);
 		return new LivingNode(mutated, this.bounds, randomPos);
-		/*if (Math.random() < 0.5) {
-			let myLogic = baseLogic;
-			if(Math.random() < 0.3){
-				// cross with random
-				myLogic = NodeLogic.lerpLogic(
-					baseLogic,
-					NodeLogic.rand(),
-					baseLogic.lerpRate
-				);
-			}
-			
-			let mutated = NodeLogic.mutate(myLogic);
-			return new LivingNode(mutated, this.bounds, randomPos);
-		} else {
-			// cross with other logic
-			let rnd = Math.random() * this.totalFitness;
-			let i = this.findReplacement(rnd);
-
-			let other;
-			if (i === -1) other = NodeLogic.rand();
-			else other = this.replacementCandidates[i].logic;
-
-			let lerpedLogic = NodeLogic.lerpLogic(baseLogic, other, 0.5);
-			let mutated = NodeLogic.mutate(lerpedLogic);
-			return new LivingNode(mutated, this.bounds, randomPos);
-		}*/
 	}
 
 	async tick() {
 		this.findNewTargetTimeout--;
 		if (this.findNewTargetTimeout <= 0) {
 			this.findNewTargetTimeout = 340;
-			this.targetPos.x = (Math.random() * 0.8 + 0.1) * this.bounds.x;
-			this.targetPos.y = (Math.random() * 0.8 + 0.1) * this.bounds.y;
+			let newTargetPos = this.targetPos;
+			const thresholdDist = Math.sqrt(this.bounds.x * this.bounds.x + this.bounds.y * this.bounds.y) * 0.1;
+			let dx, dy;
+			do {
+				newTargetPos = { x: (Math.random() * 0.8 + 0.1) * this.bounds.x,
+					y: (Math.random() * 0.8 + 0.1) * this.bounds.y };
+				dx = newTargetPos.x - this.targetPos.x;
+				dy = newTargetPos.y - this.targetPos.y;
+			} while(Math.sqrt(dx*dx + dy*dy) < thresholdDist);
+			this.targetPos = newTargetPos;
 		}
 		let ticks: Promise<void>[] = [];
 		this.nodes.forEach((n) => {
@@ -161,8 +143,9 @@ class NodeManager {
 			}
 		}
 
+		/*
 		{
-			let avgMut = 0;
+			/*let avgMut = 0;
 			let avgPrev = 0;
 			this.replacementCandidates.forEach((e) => {
 				avgMut += e.logic.mutationRate;
@@ -174,7 +157,7 @@ class NodeManager {
 
 			console.log("Avg fitness: " + (this.totalFitness / this.replacementCandidates.length));
 			console.log("Avg mutationRate: " + avgMut + " \tmutationPrevalence: " + avgPrev);
-		}
+		}*/
 
 		for (let i = 0; i < this.nodes.length; i++)
 			this.nodes[i] = this.constructNewNode();

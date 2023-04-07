@@ -49,7 +49,7 @@ function drawFunc(p: P5CanvasInstance<SketchProps>) {
 		p.fill(200);
 		p.textSize(32);
 		p.text(
-			"Avg Fitness in top 500: " +
+			"Avg Fitness in top "+nodeMgr.replacementCandidates.length+": " +
 			(
 				nodeMgr.totalFitness / nodeMgr.replacementCandidates.length
 			).toFixed(2),
@@ -69,7 +69,11 @@ function drawFunc(p: P5CanvasInstance<SketchProps>) {
 					4
 				) +
 				" " +
-				nodeMgr.replacementCandidates[0].logic.mutationPrevalence.toFixed(
+				nodeMgr.replacementCandidates[0].logic.expectedWeightMutations.toFixed(
+					4
+				) +
+				" " +
+				nodeMgr.replacementCandidates[0].logic.expectedBiasMutations.toFixed(
 					4
 				) +
 				" ",
@@ -77,20 +81,24 @@ function drawFunc(p: P5CanvasInstance<SketchProps>) {
 				90
 			);
 			let avgMut = 0;
-			let avgPrev = 0;
+			let avgWeightMut = 0, avgBiasMut = 0;
 			nodeMgr.replacementCandidates.forEach((e) => {
 				avgMut += e.logic.mutationRate;
-				avgPrev += e.logic.mutationPrevalence;
+				avgWeightMut += e.logic.expectedWeightMutations;
+				avgBiasMut += e.logic.expectedBiasMutations
 			});
 
 			avgMut /= nodeMgr.replacementCandidates.length;
-			avgPrev /= nodeMgr.replacementCandidates.length;
+			avgWeightMut /= nodeMgr.replacementCandidates.length;
+			avgBiasMut /=  nodeMgr.replacementCandidates.length;
 
 			p.text(
 				"Avg Rates: " +
 				avgMut.toFixed(4) +
 				" " +
-				avgPrev.toFixed(4) +
+				avgWeightMut.toFixed(4) +
+				" " +
+				avgBiasMut.toFixed(4) +
 				" ",
 				window.innerWidth / 2,
 				120
