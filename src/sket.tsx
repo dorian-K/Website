@@ -36,8 +36,8 @@ export function sketch(p: P5CanvasInstance<PropsType>) {
 
 		let fac = 1;
 		let value = (fCount * fac) % 512;
-		let pulse = -p.cos((value / 256) * Math.PI) / 2 + 0.5;
-		if (fCount > 256) pulse = 1;
+		let pulse = -p.cos((value / 128) * Math.PI) / 2 + 0.5;
+		if (fCount > 128) pulse = 1;
 		//if (value === 511) {
 		//	curDisplay++;
 		//	if (curDisplay > 1) curDisplay = 0;
@@ -52,12 +52,12 @@ export function sketch(p: P5CanvasInstance<PropsType>) {
 
 		p.fill(255);
 
-		if (fCount < 200)
+		/*if (fCount < 100)
 			p.translate(
 				0,
 				0,
-				-3000 * (1 - p.sin((fCount * 0.005 * 3.14159) / 2))
-			);
+				-3000 * (1 - p.sin((fCount * 0.01 * 3.14159) / 2))
+			);*/
 
 		switch (curDisplay) {
 			case 0:

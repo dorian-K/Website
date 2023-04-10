@@ -27,8 +27,23 @@
 
 .anim {
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   background-color: black;
+  z-index: -1;
 }
 
+#text {
+  position: fixed;
+  top: 0;
+  left: 0;
+	width: 100%;
+  z-index: 0;
+  overflow-y: scroll;
+  height: 100%;
+  padding-bottom: 25vh;
+
+	text-align: center;
+}

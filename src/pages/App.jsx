@@ -14,8 +14,8 @@ function App() {
 			<BrowserRouter>
 				<Routes>
 					<Route path="/g" element={<GeneticSim />} />
-					<Route path="/newhome" element={<Strict><NewHome /></Strict>} />
-					<Route path="/" element={<Strict><Portfolio /></Strict>} />
+					<Route path="/" element={<Strict><NewHome /></Strict>} />
+					<Route path="/oldhome" element={<Strict><Portfolio /></Strict>} />
 					<Route path="/a" element={<Strict><Acceptor /></Strict>} />
 					<Route path="/b" element={<Strict><Sender /></Strict>} />
 				</Routes>

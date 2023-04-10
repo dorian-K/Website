@@ -61,6 +61,7 @@
     "react-use-websocket": "^4.3.1",
     "resolve": "^1.20.0",
     "resolve-url-loader": "^5.0.0",
+    "sass": "^1.61.0",
     "sass-loader": "^13.2.2",
     "semver": "^7.3.5",
     "source-map-loader": "^4.0.1",

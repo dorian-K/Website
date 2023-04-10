@@ -1,0 +1,39 @@
+
+.portnametext {
+	font-size: 6em;
+	font-family: "Roboto Mono", monospace;
+
+	margin-top: 1vh;
+    margin-bottom: 0;
+    color: white;
+}
+
+.whiteicon {
+	color: white;
+}
+.bigfont {
+	font-size: 2em;
+}
+
+@keyframes fadetranspin {
+	from { opacity: 0.1; }
+	to   { opacity: 1; }
+  }
+@keyframes fadetranspout {
+	from { opacity: 1; }
+	to   { opacity: 0.1; }
+  }
+
+.transitionin {
+	animation: fadetranspin 0.3s ease-in-out;
+	opacity: 1;
+}
+
+.transitionout {
+	animation: fadetranspout 0.3s ease-in-out;
+	opacity: 0.1;
+}
+
+.card {
+	--bs-card-bg: rgba(255, 255, 255, 0.9);
+}
