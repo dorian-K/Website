@@ -11,7 +11,7 @@ function gaussianRandom(stdev = 1) {
 	return z * stdev;
 }
 
-const LN_2 = Math.log(2);
+// const LN_2 = Math.log(2);
 
 class Layer {
 	weights: Array<Float32Array>;
@@ -77,7 +77,9 @@ class Layer {
 		// softplus
 		//return Math.log(1 + Math.exp(x)) / LN_2 - 1;
 		return Math.tanh(x);
-		//return Math.tanh(x);
+		/*if(x < 0)
+			return -1;
+		return 1;*/
 	}
 
 	forward(input: Float32Array): Float32Array {
@@ -102,37 +104,41 @@ class NodeLogic {
 	expectedWeightMutations: number;
 	expectedBiasMutations: number;
 	lastOutput: Float32Array;
+	lastOperation: string;
 
 	constructor(
 		layers: Array<Layer>,
 		mutationRate: number,
 		expectedWeightMutations: number,
-		expectedBiasMutations: number
+		expectedBiasMutations: number,
+		lastOperation: string
 	) {
 		this.layers = layers;
 		this.mutationRate = clamp(mutationRate, 0.001, 0.5);
 		this.expectedWeightMutations = clamp(expectedWeightMutations, 0.01, 999999);
 		this.expectedBiasMutations = clamp(expectedBiasMutations, 0.01, 999999);
 		this.lastOutput = new Float32Array(this.layers[this.layers.length - 1].biases.length);
+		this.lastOperation = lastOperation;
 	}
 
 	static rand(): NodeLogic {
 		let layers = [];
 		let numLayer = 4
-		let numTotalIn = 4;
+		let numTotalIn = 7;
 		let numTotalOut = 2;
 
 		let lastOut = numTotalIn;
 		for (let i = 1; i <= numLayer; i++) {
-			let newOut = i === numLayer ? numTotalOut : 6;
+			let newOut = i === numLayer ? numTotalOut : 8;
 			layers.push(Layer.rand(lastOut, newOut));
 			lastOut = newOut;
 		}
 		return new NodeLogic(
 			layers,
-			Math.random() * 2 * 0.2,
-			Math.random() * 2 * 12,
-			Math.random() * 2 * 3
+			clamp(0.3 + gaussianRandom(0.2), 0.1, 0.5),
+			clamp(20 + gaussianRandom(8), 5, 40),
+			clamp(2 + gaussianRandom(2), 0.3, 10),
+			"random"
 		);
 	}
 
@@ -150,26 +156,26 @@ class NodeLogic {
 			nl,
 			l1.mutationRate,
 			l1.expectedWeightMutations,
-			l1.expectedBiasMutations
-		));
+			l1.expectedBiasMutations,
+			"mutation"
+		), false);
 	}
 
-	static mutateParameters(l1: NodeLogic) {
+	static mutateParameters(l1: NodeLogic, addOp: boolean) {
 		return new NodeLogic(
 			l1.layers,
 			l1.mutationRate *
-			(1 + gaussianRandom(0.025)),
+			(1 + gaussianRandom(0.03)),
 			l1.expectedWeightMutations *
-			(1 + gaussianRandom(0.1)),
+			(1 + gaussianRandom(0.15)),
 			l1.expectedBiasMutations *
-			(1 + gaussianRandom(0.1))
+			(1 + gaussianRandom(0.15)),
+			addOp === true ? "parameter_mutation" : l1.lastOperation
 		);
 	}
 
-	step(obj: Array<number>): Float32Array {
-
-		let defInp = new Float32Array(obj);
-		let inp = defInp;
+	step(obj: Float32Array): Float32Array {
+		let inp = obj;
 
 		for (let i = 0; i < this.layers.length; i++)
 			inp = this.layers[i].forward(inp);

@@ -2,6 +2,7 @@ import LivingNode from "./LivingNode";
 import NodeLogic from "./NodeLogic";
 
 class NodeManager {
+	epoch = 0;
 	nodes: Array<LivingNode>;
 	replacementCandidates: Array<{
 		fit: number;
@@ -15,6 +16,7 @@ class NodeManager {
 	bounds: { x: number; y: number };
 	targetPos: { x: number; y: number } = { x: 100, y: 100 };
 	findNewTargetTimeout: number = 0;
+	ticksSinceNewTarget: number = 0;
 
 	constructor(bounds: { x: number; y: number }) {
 		this.nodes = [];
@@ -57,9 +59,9 @@ class NodeManager {
 			this.replacementCandidates.splice(i, 1);
 		}
 
-		if (this.replacementCandidates[i].numUsed === 1)
+		if (this.replacementCandidates[i].numUsed === 1 && i < 0.25 * this.replacementCandidates.length)
 			// copy original, but mutate parameters
-			return new LivingNode(NodeLogic.mutateParameters(baseLogic), this.bounds, randomPos);
+			return new LivingNode(NodeLogic.mutateParameters(baseLogic, true), this.bounds, randomPos);
 
 		// mutate and drop back in
 		let mutated = NodeLogic.mutate(baseLogic);
@@ -68,10 +70,12 @@ class NodeManager {
 
 	async tick() {
 		this.findNewTargetTimeout--;
+		this.ticksSinceNewTarget++;
 		if (this.findNewTargetTimeout <= 0) {
-			this.findNewTargetTimeout = 340;
+			this.ticksSinceNewTarget = 0;
+			this.findNewTargetTimeout = 300 + 200 * Math.random();
 			let newTargetPos = this.targetPos;
-			const thresholdDist = Math.sqrt(this.bounds.x * this.bounds.x + this.bounds.y * this.bounds.y) * 0.1;
+			const thresholdDist = Math.sqrt(this.bounds.x * this.bounds.x + this.bounds.y * this.bounds.y) * 0.2;
 			let dx, dy;
 			do {
 				newTargetPos = { x: (Math.random() * 0.8 + 0.1) * this.bounds.x,
@@ -84,7 +88,7 @@ class NodeManager {
 		let ticks: Promise<void>[] = [];
 		this.nodes.forEach((n) => {
 			if (n.isDead()) return;
-			ticks.push(n.tick(this.targetPos));
+			ticks.push(n.tick(this.targetPos, this.findNewTargetTimeout / 400, this.ticksSinceNewTarget));
 		});
 		await Promise.allSettled(ticks);
 
@@ -99,6 +103,7 @@ class NodeManager {
 
 		if (anyAlive) return;
 
+		this.epoch++;
 		this.findNewTargetTimeout = 0;
 		// all nodes are done, lets do the genetic algorithm
 		// first calculate fitness and insert into replacement candidates
@@ -143,21 +148,24 @@ class NodeManager {
 			}
 		}
 
-		/*
+		
 		{
-			/*let avgMut = 0;
-			let avgPrev = 0;
+			//let avgMut = 0;
+			let avgWeight = 0, avgBias = 0;
 			this.replacementCandidates.forEach((e) => {
-				avgMut += e.logic.mutationRate;
-				avgPrev += e.logic.mutationPrevalence;
+				//avgMut += e.logic.mutationRate;
+				avgWeight += e.logic.expectedWeightMutations;
+				avgBias += e.logic.expectedBiasMutations;
 			});
 
-			avgMut /= this.replacementCandidates.length;
-			avgPrev /= this.replacementCandidates.length;
+			//avgMut /= this.replacementCandidates.length;
+			avgWeight /= this.replacementCandidates.length;
+			avgBias /= this.replacementCandidates.length;
 
-			console.log("Avg fitness: " + (this.totalFitness / this.replacementCandidates.length));
-			console.log("Avg mutationRate: " + avgMut + " \tmutationPrevalence: " + avgPrev);
-		}*/
+			console.log(avgWeight / avgBias);
+			//console.log("Avg fitness: " + (this.totalFitness / this.replacementCandidates.length));
+			//console.log("Avg mutationRate: " + avgMut + " \tmutationPrevalence: " + avgPrev);
+		}
 
 		for (let i = 0; i < this.nodes.length; i++)
 			this.nodes[i] = this.constructNewNode();

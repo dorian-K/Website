@@ -2,22 +2,36 @@ import { P5CanvasInstance, ReactP5Wrapper, SketchProps } from "react-p5-wrapper"
 import NodeManager from "./logic/NodeManager";
 import { Mutex } from "async-mutex";
 import LivingNode from "./logic/LivingNode";
+import { useState } from "react";
+import { useEffect } from "react";
 
-function drawFunc(p: P5CanvasInstance<SketchProps>) {
+type MyProps = SketchProps & {
+	showRand?: boolean,
+	showMut?: boolean
+}
+
+function drawFunc(p: P5CanvasInstance<MyProps>) {
 	// let firstFrame = 0;
 	let nodeMgr = new NodeManager({ x: 100, y: 100 });
 	let nodeMtx = new Mutex();
 	let simScale = 3;
+	let showRandom = true;
+	let showMut = true;
 
 	let lastNodeList: Array<LivingNode> = [];
 
 	let runner = async () => {
 		await nodeMtx.runExclusive(() => {
-			for (let i = 0; i < 3; i++) nodeMgr.tick();
+			for (let i = 0; i < 4; i++) nodeMgr.tick();
 			lastNodeList = nodeMgr.nodes;
 		});
 
 		setTimeout(runner, 0);
+	};
+
+	p.updateWithProps = (props: MyProps) => {
+		showRandom = props.showRand === true;
+		showMut = props.showMut === true;
 	};
 
 	p.setup = () => {
@@ -103,16 +117,39 @@ function drawFunc(p: P5CanvasInstance<SketchProps>) {
 				window.innerWidth / 2,
 				120
 			);
+			p.text(
+				"Epoch: "+nodeMgr.epoch,
+				window.innerWidth / 2,
+				150
+			);
 		}
 
 		//nodeMgr.targetPos.x = locX;
 		//nodeMgr.targetPos.y = locY;
+		p.noFill();
+		p.stroke(255, 255, 255);
+		p.strokeWeight(1);
+		//p.line(nodeMgr.bounds.x * 0.5 * simScale, 0, nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * 0.4 * simScale);
+		//p.line(nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * 0.6 * simScale, nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * simScale);
+		p.rect(nodeMgr.bounds.x * 0.45 * simScale, nodeMgr.bounds.y * 0.2 * simScale, 
+			nodeMgr.bounds.x * 0.1 * simScale, nodeMgr.bounds.y * 0.6 * simScale);
 
 		p.noStroke();
 		p.fill(255);
+		
 
 		lastNodeList.forEach((e) => {
-			p.circle(e.posX * simScale, e.posY * simScale, 5);
+			if(e.logic.lastOperation === "random" && !showRandom)
+				return;
+			if(e.logic.lastOperation === "mutation" && !showMut)
+				return;
+			if(e.logic.lastOperation === "random")
+				p.fill(150, 150, 255);
+			else if(e.logic.lastOperation === "parameter_mutation")
+				p.fill(255, 100, 100);
+			else
+				p.fill(255);
+			p.circle(e.pos.x * simScale, e.pos.y * simScale, 5);
 		});
 
 		p.noFill();
@@ -124,9 +161,28 @@ function drawFunc(p: P5CanvasInstance<SketchProps>) {
 }
 
 export default function GeneticSim() {
+
+	const [showRandom, setShowRandom] = useState(true);
+	const [showMut, setShowMut] = useState(true);
+
+	const onKeyDown = (ev: KeyboardEvent) => {
+		if(ev.key === '1')
+			setShowRandom(!showRandom); 
+		if(ev.key === '2')
+			setShowMut(!showMut); 
+	};
+
+	useEffect(() => {
+		document.addEventListener("keydown", onKeyDown);
+
+		return () => {
+			document.removeEventListener("keydown", onKeyDown);
+		}
+	})
+
 	return (
 		<div className="anim">
-			<ReactP5Wrapper sketch={drawFunc} />
+			<ReactP5Wrapper sketch={drawFunc} showRand={showRandom} showMut={showMut} />
 		</div>
 	);
 }
