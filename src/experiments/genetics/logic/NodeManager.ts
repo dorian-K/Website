@@ -71,10 +71,10 @@ class NodeManager {
 	async tick() {
 		this.findNewTargetTimeout--;
 		this.ticksSinceNewTarget++;
-		if (this.findNewTargetTimeout <= 0) {
-			this.ticksSinceNewTarget = 0;
-			this.findNewTargetTimeout = 300 + 200 * Math.random();
-			let newTargetPos = this.targetPos;
+		//if (this.findNewTargetTimeout <= 0) {
+			//this.ticksSinceNewTarget = 0;
+			//this.findNewTargetTimeout = 30000 + 200 * Math.random();
+			/*let newTargetPos = this.targetPos;
 			const thresholdDist = Math.sqrt(this.bounds.x * this.bounds.x + this.bounds.y * this.bounds.y) * 0.2;
 			let dx, dy;
 			do {
@@ -83,8 +83,12 @@ class NodeManager {
 				dx = newTargetPos.x - this.targetPos.x;
 				dy = newTargetPos.y - this.targetPos.y;
 			} while(Math.sqrt(dx*dx + dy*dy) < thresholdDist);
-			this.targetPos = newTargetPos;
-		}
+			this.targetPos = newTargetPos;*/
+			this.targetPos = { x: this.bounds.x * 0.3, y: this.bounds.y * 0.5 };
+			const radius = Math.min(this.bounds.x * 0.15, this.bounds.y * 0.15);
+			this.targetPos = { x: this.targetPos.x + Math.sin(this.ticksSinceNewTarget / 100) * radius, 
+							y: this.targetPos.y + Math.cos(this.ticksSinceNewTarget / 100) * radius}
+		//}
 		let ticks: Promise<void>[] = [];
 		this.nodes.forEach((n) => {
 			if (n.isDead()) return;

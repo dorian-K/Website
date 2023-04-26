@@ -34,8 +34,8 @@ class LivingNode {
 		const action = this.logic.step(new Float32Array([
 			this.pos.x / (this.bounds.x * 0.5) - 1, this.pos.y / (this.bounds.y * 0.5) - 1,
 			this.vel.x, this.vel.y,
-			targetPos.x / (this.bounds.x * 0.5) - 1, targetPos.y / (this.bounds.y * 0.5) - 1,
-			newTargetTimeout * 2 - 1
+			targetPos.x / (this.bounds.x * 0.5) - 1, targetPos.y / (this.bounds.y * 0.5) - 1/*,
+			newTargetTimeout * 2 - 1*/
 		]));
 		//console.log(action[0], " ", action[1]);
 		// action is an array with 2 values: x and y movement

@@ -124,7 +124,7 @@ class NodeLogic {
 	static rand(): NodeLogic {
 		let layers = [];
 		let numLayer = 4
-		let numTotalIn = 7;
+		let numTotalIn = 6;
 		let numTotalOut = 2;
 
 		let lastOut = numTotalIn;
