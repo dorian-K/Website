@@ -8,6 +8,12 @@ export type PropsType = SketchProps & {
 	expression: string
 }
 
+export type PropsType2 = SketchProps & {
+	showVelocity: boolean,
+	numBodies: number,
+	showCenter: boolean
+}
+
 class ThreeDeeObject {
 	x: number;
 	y: number;
@@ -43,23 +49,28 @@ class ThreeDeeObject {
 		this.mass = Math.pow(this.radius * 100, 3);
 	}
 
-	draw(p: P5CanvasInstance<PropsType>) {
+	draw(p: P5CanvasInstance<PropsType2>, drawVel: boolean) {
 		p.push();
 
 		p.translate(this.x, this.y, this.z);
 		//p.noFill();
 		p.fill(255);
 		p.sphere(this.radius);
-		p.stroke(255);
-		p.strokeWeight(3);
-		// p.line(0, 0, 0, this.velx / this.mass * 50, this.vely / this.mass * 50, this.vely / this.mass * 50);
+		if(drawVel === true){
+			p.stroke(255);
+			p.strokeWeight(3);
+			p.line(0, 0, 0, this.velx / this.mass * 50, this.vely / this.mass * 50, this.vely / this.mass * 50);
+			
+		}
 		
 		p.pop();
 	}
 }
 
-export function sketch2(p: P5CanvasInstance<PropsType>) {
+export function sketch2(p: P5CanvasInstance<PropsType2>) {
+	let showVelocity = false;
 	let objects: Array<ThreeDeeObject> = [];
+	let showCenter = false;
 
 	let centerObj = new ThreeDeeObject(0);
 	centerObj.setRadius(40);
@@ -78,8 +89,21 @@ export function sketch2(p: P5CanvasInstance<PropsType>) {
 		};
 	};
 
-	p.updateWithProps = (props: PropsType) => {
-		
+	p.updateWithProps = (props: PropsType2) => {
+		try {
+			showVelocity = props.showVelocity;
+			showCenter = props.showCenter;
+			let newNumBodies = Math.max(2, props.numBodies);
+			while(objects.length > newNumBodies)
+				objects.pop();
+			while(objects.length < newNumBodies){
+				let newObj = new ThreeDeeObject(objects.length);
+				newObj.init();
+				objects.push(newObj);
+			}
+		} catch (e) {
+			
+		}
 	};
 
 	p.draw = () => {
@@ -91,24 +115,25 @@ export function sketch2(p: P5CanvasInstance<PropsType>) {
 
 		p.fill(255);
 		
-		p.orbitControl(3, 3, 0);
+		//p.orbitControl(3, 3, 0);
 		p.translate(0, 0, 0);
-		p.rotateX(-Math.PI * 0.25);
-		p.rotateY(Math.PI * 0.25);
-		
+		//p.rotateX(p.mouseY / (p.height / 2) * Math.PI * -0.5);
+		p.rotateX(-p.mouseY / (p.height / 2) * Math.PI * 0.35 + 0.35 * Math.PI);
+		//p.rotateY(Math.PI * 0.25);
+		p.rotateY(p.mouseX / (p.width / 2) * Math.PI); 
 
 		//let fCount = Math.max(1, p.frameCount - firstFrame - 5);
 		//p.rotateY(fCount * 0.001);
 		//p.rotateX(0.2);
 		
-
+		if(true)
 		{
 			let fac = 20;
 			let ext = 12;
 			p.push();
 
-			p.strokeWeight(2);
-			p.stroke(200, 150);
+			p.strokeWeight(1);
+			p.stroke(200, 100);
 			p.line(-fac * ext, 0, 0, fac * ext, 0, 0);
 			p.line(0, 0, -fac * ext, 0, 0, fac * ext);
 			p.line(0, -fac * ext, 0, 0, fac * ext, 0);
@@ -181,14 +206,17 @@ export function sketch2(p: P5CanvasInstance<PropsType>) {
 			}
 		}
 
-		p.ambientLight(255, 229, 112);
-		objects[0].draw(p);
+		if(showCenter){
+			p.ambientLight(170, 170, 150);
+			objects[0].draw(p, showVelocity);
+		}
+		
 		
 		p.noLights();
-		p.ambientLight(30, 30, 30);
-		p.pointLight(255, 240, 150, 0, 0, 0);
+		p.ambientLight(50, 50, 50);
+		p.pointLight(255, 240, 200, 0, 0, 0);
 		for(let i = 1; i < objects.length; i++){
-			objects[i].draw(p);
+			objects[i].draw(p, showVelocity);
 		}
 	};
 }
