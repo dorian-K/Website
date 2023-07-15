@@ -5,13 +5,13 @@ import { faRadio, faRightToBracket, faWaveSquare } from "@fortawesome/free-solid
 
 import { ReactP5Wrapper } from "react-p5-wrapper";
 import "./NewHome.scss";
-import { sketch } from "../sket";
+import { sketch2 } from "../sket";
 import { useNavigate } from "react-router-dom";
 
 function BgComponent(props: {expression: any}) {
 	return (
-		<div className="anim">
-			<ReactP5Wrapper sketch={sketch} expression={props.expression} />
+		<div className="anim" style={{pointerEvents: "auto"}}>
+			<ReactP5Wrapper sketch={sketch2} expression={props.expression} />
 		</div>
 	);
 }
@@ -93,7 +93,8 @@ function NewHome() {
 				style={{
 					position: "fixed",
 					bottom: "1.5em",
-					zIndex: 1
+					zIndex: 1,
+					display: "none"
 				}}
 			>
 				<input
