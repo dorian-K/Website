@@ -76,9 +76,8 @@
     "workbox-webpack-plugin": "^6.4.1"
   },
   "scripts": {
-    "start": "node scripts/start.js",
-    "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "start": "vite",
+    "build": "eslint src && tsc && vite build"
   },
   "eslintConfig": {
     "extends": [
@@ -155,6 +154,8 @@
     ]
   },
   "devDependencies": {
-    "@types/react": "^18.0.33"
+    "@types/react": "^18.0.33",
+    "@vitejs/plugin-react": "^4.0.4",
+    "vite": "^4.4.9"
   }
 }
