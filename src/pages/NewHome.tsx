@@ -84,6 +84,10 @@ function NewHome() {
 									Open
 									<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
 								</button>
+								<button type="button" className="btn btn-primary mb-2" onClick={() => {navigate("/gr")}}>
+									Open WASM
+									<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
+								</button>
 							</div>
 							Train a neural network to follow a red circle using a <b>Genetic Algorithm</b>.
 						</Card>

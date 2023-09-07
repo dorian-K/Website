@@ -35,14 +35,14 @@ const reactRefreshRuntimeEntry = require.resolve('react-refresh/runtime');
 const reactRefreshWebpackPluginRuntimeEntry = require.resolve(
   '@pmmmwh/react-refresh-webpack-plugin'
 );
-const babelRuntimeEntry = require.resolve('babel-preset-react-app');
+/*const babelRuntimeEntry = require.resolve('@babel/preset-react');
 const babelRuntimeEntryHelpers = require.resolve(
   '@babel/runtime/helpers/esm/assertThisInitialized',
   { paths: [babelRuntimeEntry] }
 );
 const babelRuntimeRegenerator = require.resolve('@babel/runtime/regenerator', {
   paths: [babelRuntimeEntry],
-});
+});*/
 
 // Some apps do not need the benefits of saving a web request, so not inlining the chunk
 // makes for a smoother build process.
@@ -332,7 +332,7 @@ module.exports = function (webpackEnv) {
           reactRefreshWebpackPluginRuntimeEntry,
           babelRuntimeEntry,
           babelRuntimeEntryHelpers,
-          babelRuntimeRegenerator,
+          /*babelRuntimeRegenerator,*/
         ]),
       ],
     },
@@ -408,12 +408,12 @@ module.exports = function (webpackEnv) {
               include: paths.appSrc,
               loader: require.resolve('babel-loader'),
               options: {
-                customize: require.resolve(
+                /*customize: require.resolve(
                   'babel-preset-react-app/webpack-overrides'
-                ),
+                ),*/
                 presets: [
                   [
-                    require.resolve('babel-preset-react-app'),
+                    require.resolve('babelRuntimeRegenerator'),
                     {
                       runtime: hasJsxRuntime ? 'automatic' : 'classic',
                     },
@@ -446,7 +446,7 @@ module.exports = function (webpackEnv) {
                 compact: false,
                 presets: [
                   [
-                    require.resolve('babel-preset-react-app/dependencies'),
+                    require.resolve('@babel/preset-react'),
                     { helpers: true },
                   ],
                 ],
