@@ -1,4 +1,4 @@
-import { P5CanvasInstance, ReactP5Wrapper, SketchProps } from "react-p5-wrapper";
+import { P5CanvasInstance, ReactP5Wrapper, SketchProps } from "@p5-wrapper/react";
 import NodeManager from "./logic/NodeManager";
 import { Mutex } from "async-mutex";
 import LivingNode from "./logic/LivingNode";
