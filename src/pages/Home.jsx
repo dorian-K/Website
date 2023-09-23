@@ -5,7 +5,7 @@ import { faRadio, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
 
 import { Link } from 'react-router-dom'
 
-import { ReactP5Wrapper } from "react-p5-wrapper";
+import { ReactP5Wrapper } from "@p5-wrapper/react";
 import "./Home.css";
 import { sketch } from "../sket";
 

@@ -4,7 +4,8 @@ import { Mutex } from "async-mutex";
 import LivingNode from "./logic/LivingNode";
 import { useState } from "react";
 import { useEffect } from "react";
-import init, { greet } from "../wasm/pkg/wasm"
+import init from "../wasm/pkg/wasm"
+import { OperationType } from "../wasm/pkg/wasm";
 
 type MyProps = SketchProps & {
 	showRand?: boolean,
@@ -14,7 +15,6 @@ type MyProps = SketchProps & {
 function drawFunc(p: P5CanvasInstance<MyProps>) {
 	// let firstFrame = 0;
 	let nodeMgr = new NodeManager({ x: 100, y: 100 });
-	let nodeMtx = new Mutex();
 	let simScale = 3;
 	let showRandom = true;
 	let showMut = true;
@@ -22,10 +22,11 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 	let lastNodeList: Array<LivingNode> = [];
 
 	let runner = async () => {
-		await nodeMtx.runExclusive(() => {
-			for (let i = 0; i < 4; i++) nodeMgr.tick();
-			lastNodeList = nodeMgr.nodes;
-		});
+		let start = performance.now();
+		for (let i = 0; i < 4; i++) nodeMgr.tick();
+		let end = performance.now();
+		//console.log(`tick took ${end - start}`);
+		lastNodeList = nodeMgr.nodes;
 
 		setTimeout(runner, 0);
 	};
@@ -36,22 +37,21 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 	};
 
 	p.setup = () => {
-		nodeMtx.runExclusive(() => {
+		
+		nodeMgr = new NodeManager({
+			x: window.innerWidth / simScale,
+			y: window.innerHeight / simScale,
+		});
+		setTimeout(runner, 8);
+		
+
+		p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
+		window.onresize = function () {
 			nodeMgr = new NodeManager({
 				x: window.innerWidth / simScale,
 				y: window.innerHeight / simScale,
 			});
-			setTimeout(runner, 8);
-		});
-
-		p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
-		window.onresize = function () {
-			nodeMtx.runExclusive(() => {
-				nodeMgr = new NodeManager({
-					x: window.innerWidth / simScale,
-					y: window.innerHeight / simScale,
-				});
-			});
+			
 			p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
 		};
 		// firstFrame = p.frameCount;
@@ -80,15 +80,15 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 			);
 			p.text(
 				"Top Rates: " +
-				nodeMgr.replacementCandidates[0].logic.mutationRate.toFixed(
+				nodeMgr.replacementCandidates[0].logic.mutation_rate.toFixed(
 					4
 				) +
 				" " +
-				nodeMgr.replacementCandidates[0].logic.expectedWeightMutations.toFixed(
+				nodeMgr.replacementCandidates[0].logic.expected_weight_mutations.toFixed(
 					4
 				) +
 				" " +
-				nodeMgr.replacementCandidates[0].logic.expectedBiasMutations.toFixed(
+				nodeMgr.replacementCandidates[0].logic.expected_bias_mutations.toFixed(
 					4
 				) +
 				" ",
@@ -98,9 +98,9 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 			let avgMut = 0;
 			let avgWeightMut = 0, avgBiasMut = 0;
 			nodeMgr.replacementCandidates.forEach((e) => {
-				avgMut += e.logic.mutationRate;
-				avgWeightMut += e.logic.expectedWeightMutations;
-				avgBiasMut += e.logic.expectedBiasMutations
+				avgMut += e.logic.mutation_rate;
+				avgWeightMut += e.logic.expected_weight_mutations;
+				avgBiasMut += e.logic.expected_bias_mutations
 			});
 
 			avgMut /= nodeMgr.replacementCandidates.length;
@@ -140,13 +140,13 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 		
 
 		lastNodeList.forEach((e) => {
-			if(e.logic.lastOperation === "random" && !showRandom)
+			if(e.logic.last_operation === OperationType.Random && !showRandom)
 				return;
-			if(e.logic.lastOperation === "mutation" && !showMut)
+			if(e.logic.last_operation === OperationType.Mutation && !showMut)
 				return;
-			if(e.logic.lastOperation === "random")
+			if(e.logic.last_operation === OperationType.Random)
 				p.fill(150, 150, 255);
-			else if(e.logic.lastOperation === "parameter_mutation")
+			else if(e.logic.last_operation === OperationType.ParameterMutation)
 				p.fill(255, 100, 100);
 			else
 				p.fill(255);
@@ -165,6 +165,7 @@ export default function WasmGeneticSim() {
 
 	const [showRandom, setShowRandom] = useState(true);
 	const [showMut, setShowMut] = useState(true);
+	const [shouldMount, setShouldMount] = useState(false);
 
 	const onKeyDown = (ev: KeyboardEvent) => {
 		if(ev.key === '1')
@@ -175,14 +176,21 @@ export default function WasmGeneticSim() {
 
 	useEffect(() => {
 		init().then(() => {
-			greet("Web assembly");
+			setShouldMount(true);
 		});
 		document.addEventListener("keydown", onKeyDown);
 
 		return () => {
 			document.removeEventListener("keydown", onKeyDown);
 		}
-	})
+	}, [])
+
+	if(!shouldMount)
+		return (
+			<div className="anim">
+				<h2>Loading webassembly...</h2>
+			</div>
+		);
 
 	return (
 		<div className="anim">

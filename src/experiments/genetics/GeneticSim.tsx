@@ -1,4 +1,4 @@
-import { P5CanvasInstance, ReactP5Wrapper, SketchProps } from "react-p5-wrapper";
+import { P5CanvasInstance, ReactP5Wrapper, SketchProps } from "@p5-wrapper/react";
 import NodeManager from "./logic/NodeManager";
 import { Mutex } from "async-mutex";
 import LivingNode from "./logic/LivingNode";
@@ -21,10 +21,10 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 	let lastNodeList: Array<LivingNode> = [];
 
 	let runner = async () => {
-		await nodeMtx.runExclusive(() => {
-			for (let i = 0; i < 4; i++) nodeMgr.tick();
-			lastNodeList = nodeMgr.nodes;
-		});
+		let start = performance.now();
+		for (let i = 0; i < 4; i++) nodeMgr.tick();
+		let end = performance.now();
+		// console.log(`tick took ${end - start}`);
 
 		setTimeout(runner, 0);
 	};

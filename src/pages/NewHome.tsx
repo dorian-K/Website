@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faRadio, faRightToBracket, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
 
-import { ReactP5Wrapper } from "react-p5-wrapper";
+import { ReactP5Wrapper } from "@p5-wrapper/react";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
 import { useNavigate } from "react-router-dom";

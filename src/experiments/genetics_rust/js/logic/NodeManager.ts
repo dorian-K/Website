@@ -1,5 +1,5 @@
 import LivingNode from "./LivingNode";
-import NodeLogic from "./NodeLogic";
+import { NodeLogic } from "../../wasm/pkg/wasm"
 
 class NodeManager {
 	epoch = 0;
@@ -46,7 +46,7 @@ class NodeManager {
 		let i = this.findReplacement(rnd);
 
 		if (i === -1)
-			return new LivingNode(NodeLogic.rand(), this.bounds, randomPos);
+			return new LivingNode(NodeLogic.random(), this.bounds, randomPos);
 
 		let baseLogic = this.replacementCandidates[i].logic;
 		this.replacementCandidates[i].numUsed += 1;
@@ -61,7 +61,7 @@ class NodeManager {
 
 		if (this.replacementCandidates[i].numUsed === 1 && i < 0.25 * this.replacementCandidates.length)
 			// copy original, but mutate parameters
-			return new LivingNode(NodeLogic.mutateParameters(baseLogic, true), this.bounds, randomPos);
+			return new LivingNode(NodeLogic.mutate_parameters(baseLogic, true), this.bounds, randomPos);
 
 		// mutate and drop back in
 		let mutated = NodeLogic.mutate(baseLogic);
@@ -158,8 +158,8 @@ class NodeManager {
 			let avgWeight = 0, avgBias = 0;
 			this.replacementCandidates.forEach((e) => {
 				//avgMut += e.logic.mutationRate;
-				avgWeight += e.logic.expectedWeightMutations;
-				avgBias += e.logic.expectedBiasMutations;
+				avgWeight += e.logic.expected_weight_mutations;
+				avgBias += e.logic.expected_bias_mutations;
 			});
 
 			//avgMut /= this.replacementCandidates.length;

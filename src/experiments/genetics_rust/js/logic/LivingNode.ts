@@ -1,4 +1,4 @@
-import NodeLogic from "./NodeLogic";
+import { NodeLogic } from "../../wasm/pkg/wasm"
 
 function clamp(val: number, min: number, max: number) {
 	return Math.max(Math.min(val, max), min);
@@ -31,7 +31,7 @@ class LivingNode {
 		if (this.isDead()) return;
 		let dx = this.pos.x - targetPos.x;
 		let dy = this.pos.y - targetPos.y;
-		const action = this.logic.step(new Float32Array([
+		const action = this.logic.step(new Float64Array([
 			this.pos.x / (this.bounds.x * 0.5) - 1, this.pos.y / (this.bounds.y * 0.5) - 1,
 			this.vel.x, this.vel.y,
 			targetPos.x / (this.bounds.x * 0.5) - 1, targetPos.y / (this.bounds.y * 0.5) - 1/*,

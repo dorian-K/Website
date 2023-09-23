@@ -9,13 +9,13 @@ fn gaussian_random(stddev: f64) -> f64 {
 	return z * stddev;
 }
 
-#[wasm_bindgen]
+#[derive(Clone)]
 pub struct Layer {
 	weights: Vec<Vec<f64>>,
 	biases: Vec<f64>
 }
 impl Layer {
-	fn new(weights: Vec<Vec<f64>>, biases: Vec<f64>) -> Layer {
+	pub fn new(weights: Vec<Vec<f64>>, biases: Vec<f64>) -> Layer {
 		Layer { weights, biases }
 	}
 	fn rand(num_in: i32, num_out: i32) -> Layer {
@@ -97,37 +97,46 @@ impl Layer {
 					.sum::<f64>();
 				bias + dot_product
 			})
+			.map(|val| {
+				self.activation(val)
+			})
 			.collect()
 	}
 }
 
-pub struct NodeLogic {
-	layers: Vec<Layer>,
-	mutation_rate: f64,
-	expected_weight_mutations: f64,
-	expected_bias_mutations: f64,
-	last_output: Vec<f64>,
-	last_operation: String
+#[derive(Copy, Clone)]
+#[wasm_bindgen]
+pub enum OperationType {
+	Mutation,
+	ParameterMutation,
+	Random
 }
 
-impl NodeLogic {
-	fn new(layers: Vec<Layer>,
-		   mutation_rate: f64,
-		   expected_weight_mutations: f64,
-		   expected_bias_mutations: f64,
-		   last_operation: String) -> NodeLogic {
-		let last_output = vec![0.0; layers.last().map(|x| x.biases.len()).unwrap_or(0)];
-		NodeLogic{
-			layers,
-			mutation_rate: mutation_rate.clamp(0.001, 0.5),
-			expected_weight_mutations: expected_weight_mutations.clamp(0.01, 999999f64),
-			expected_bias_mutations: expected_bias_mutations.clamp(0.01, 999999f64),
-			last_output,
-			last_operation
-		}
-	}
+#[wasm_bindgen]
+pub struct NodeLogic {
+	#[wasm_bindgen(skip)]
+	pub layers: Vec<Layer>,
+	pub mutation_rate: f64,
+	pub expected_weight_mutations: f64,
+	pub expected_bias_mutations: f64,
+	#[wasm_bindgen(skip)]
+	pub last_output: Vec<f64>,
+	pub last_operation: OperationType
+}
 
-	fn random() -> NodeLogic {
+#[wasm_bindgen]
+impl NodeLogic {
+	pub fn step(&mut self, obj: Vec<f64>) -> Vec<f64> {
+		let mut inp = obj;
+
+		for layer in &self.layers {
+			inp = layer.forward(inp)
+		}
+		self.last_output = inp.clone();
+
+		inp
+	}
+	pub fn random() -> NodeLogic {
 		const NUM_LAYERS: usize = 4;
 		const NUM_IN: i32 = 6;
 		const NUM_OUT: i32 = 2;
@@ -145,11 +154,54 @@ impl NodeLogic {
 			(0.3 + gaussian_random(0.2)).clamp(0.1, 0.5),
 			(20.0 + gaussian_random(8f64)).clamp(5f64, 40f64),
 			(2.0 + gaussian_random(2f64)).clamp(0.3, 10f64),
-			String::from("random")
+			OperationType::Random
 		)
 	}
 
-	fn mutate(&self) -> NodeLogic {
-		
+	pub fn mutate_parameters(l1: &NodeLogic, add_op: bool) -> NodeLogic {
+		NodeLogic::new(
+			l1.layers.clone(),
+			l1.mutation_rate * (1.0 + gaussian_random(0.03)),
+			l1.expected_weight_mutations * (1.0 + gaussian_random(0.15)),
+			l1.expected_bias_mutations * (1.0 + gaussian_random(0.15)),
+			if add_op { OperationType::ParameterMutation } else { l1.last_operation }
+		)
+	}
+
+	pub fn mutate(l1: &NodeLogic) -> NodeLogic {
+		let num_layers = l1.layers.len();
+		let mut layers = Vec::with_capacity(num_layers);
+		for i in 0..num_layers {
+			layers.push(l1.layers[i].mutate(
+				l1.mutation_rate,
+				l1.expected_weight_mutations / num_layers as f64,
+				l1.expected_bias_mutations / num_layers as f64));
+		}
+
+		let new = NodeLogic::new(
+			layers,
+			l1.mutation_rate,
+			l1.expected_weight_mutations,
+			l1.expected_bias_mutations,
+			OperationType::Mutation);
+
+		NodeLogic::mutate_parameters(&new, false)
+	}
+}
+impl NodeLogic {
+	fn new(layers: Vec<Layer>,
+		   mutation_rate: f64,
+		   expected_weight_mutations: f64,
+		   expected_bias_mutations: f64,
+		   last_operation: OperationType) -> NodeLogic {
+		let last_output = vec![0.0; layers.last().map(|x| x.biases.len()).unwrap_or(0)];
+		NodeLogic {
+			layers,
+			mutation_rate: mutation_rate.clamp(0.001, 0.5),
+			expected_weight_mutations: expected_weight_mutations.clamp(0.01, 999999f64),
+			expected_bias_mutations: expected_bias_mutations.clamp(0.01, 999999f64),
+			last_output,
+			last_operation
+		}
 	}
 }

@@ -1,5 +1,5 @@
 import { create, all } from "mathjs";
-import { P5CanvasInstance, SketchProps } from "react-p5-wrapper";
+import { P5CanvasInstance, SketchProps } from "@p5-wrapper/react";
 
 const config = {};
 const math = create(all, config);
