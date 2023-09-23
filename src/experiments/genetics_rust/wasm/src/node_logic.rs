@@ -1,5 +1,6 @@
 use wasm_bindgen::prelude::*;
 use rand::Rng;
+use serde::{Serialize};
 
 fn gaussian_random(stddev: f64) -> f64 {
 	let mut rng = rand::thread_rng();
@@ -104,7 +105,7 @@ impl Layer {
 	}
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Serialize)]
 #[wasm_bindgen]
 pub enum OperationType {
 	Mutation,
@@ -112,27 +113,33 @@ pub enum OperationType {
 	Random
 }
 
-#[wasm_bindgen]
+impl OperationType {
+	pub fn to_number(&self) -> i32 {
+		match self {
+			OperationType::Mutation => 0,
+			OperationType::ParameterMutation => 1,
+			OperationType::Random => 2
+		}
+	}
+}
+
+#[derive(Clone)]
 pub struct NodeLogic {
-	#[wasm_bindgen(skip)]
 	pub layers: Vec<Layer>,
 	pub mutation_rate: f64,
 	pub expected_weight_mutations: f64,
 	pub expected_bias_mutations: f64,
-	#[wasm_bindgen(skip)]
-	pub last_output: Vec<f64>,
+	//pub last_output: Vec<f64>,
 	pub last_operation: OperationType
 }
 
-#[wasm_bindgen]
 impl NodeLogic {
 	pub fn step(&mut self, obj: Vec<f64>) -> Vec<f64> {
 		let mut inp = obj;
 
-		for layer in &self.layers {
+		for layer in self.layers.iter() {
 			inp = layer.forward(inp)
 		}
-		self.last_output = inp.clone();
 
 		inp
 	}
@@ -194,13 +201,13 @@ impl NodeLogic {
 		   expected_weight_mutations: f64,
 		   expected_bias_mutations: f64,
 		   last_operation: OperationType) -> NodeLogic {
-		let last_output = vec![0.0; layers.last().map(|x| x.biases.len()).unwrap_or(0)];
+		//let last_output = vec![0.0; layers.last().map(|x| x.biases.len()).unwrap_or(0)];
 		NodeLogic {
 			layers,
 			mutation_rate: mutation_rate.clamp(0.001, 0.5),
 			expected_weight_mutations: expected_weight_mutations.clamp(0.01, 999999f64),
 			expected_bias_mutations: expected_bias_mutations.clamp(0.01, 999999f64),
-			last_output,
+			//last_output,
 			last_operation
 		}
 	}

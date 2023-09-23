@@ -13,10 +13,10 @@ type MyProps = SketchProps & {
 function drawFunc(p: P5CanvasInstance<MyProps>) {
 	// let firstFrame = 0;
 	let nodeMgr = new NodeManager({ x: 100, y: 100 });
-	let nodeMtx = new Mutex();
 	let simScale = 3;
 	let showRandom = true;
 	let showMut = true;
+	let perfTimes: Array<number> = [];
 
 	let lastNodeList: Array<LivingNode> = [];
 
@@ -24,7 +24,11 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 		let start = performance.now();
 		for (let i = 0; i < 4; i++) nodeMgr.tick();
 		let end = performance.now();
-		// console.log(`tick took ${end - start}`);
+		perfTimes.push(end - start);
+		if (perfTimes.length > 300)
+			perfTimes.shift();
+
+		lastNodeList = nodeMgr.nodes;
 
 		setTimeout(runner, 0);
 	};
@@ -35,22 +39,20 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 	};
 
 	p.setup = () => {
-		nodeMtx.runExclusive(() => {
+		nodeMgr = new NodeManager({
+			x: window.innerWidth / simScale,
+			y: window.innerHeight / simScale,
+		});
+		setTimeout(runner, 8);
+		
+
+		p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
+		window.onresize = function () {
 			nodeMgr = new NodeManager({
 				x: window.innerWidth / simScale,
 				y: window.innerHeight / simScale,
 			});
-			setTimeout(runner, 8);
-		});
-
-		p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
-		window.onresize = function () {
-			nodeMtx.runExclusive(() => {
-				nodeMgr = new NodeManager({
-					x: window.innerWidth / simScale,
-					y: window.innerHeight / simScale,
-				});
-			});
+			
 			p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
 		};
 		// firstFrame = p.frameCount;
@@ -62,6 +64,20 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 		p.background(0);
 		p.fill(200);
 		p.textSize(32);
+
+		if (perfTimes.length > 0) {
+			let avgPerf = 0;
+			perfTimes.forEach(p => {
+				avgPerf += p;
+			})
+			avgPerf /= perfTimes.length;
+			p.text(
+				"ms/iter: " + avgPerf.toFixed(2),
+				10,
+				30
+			);
+		}
+
 		p.text(
 			"Avg Fitness in top "+nodeMgr.replacementCandidates.length+": " +
 			(
@@ -137,7 +153,6 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 		p.noStroke();
 		p.fill(255);
 		
-
 		lastNodeList.forEach((e) => {
 			if(e.logic.lastOperation === "random" && !showRandom)
 				return;

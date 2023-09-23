@@ -1,32 +1,33 @@
 import { P5CanvasInstance, ReactP5Wrapper, SketchProps } from "@p5-wrapper/react";
-import NodeManager from "./logic/NodeManager";
-import { Mutex } from "async-mutex";
-import LivingNode from "./logic/LivingNode";
 import { useState } from "react";
 import { useEffect } from "react";
 import init from "../wasm/pkg/wasm"
-import { OperationType } from "../wasm/pkg/wasm";
+import { OperationType, NodeManager, Vec2 } from "../wasm/pkg/wasm";
 
 type MyProps = SketchProps & {
-	showRand?: boolean,
-	showMut?: boolean
+	showRand: boolean,
+	showMut: boolean
 }
 
 function drawFunc(p: P5CanvasInstance<MyProps>) {
 	// let firstFrame = 0;
-	let nodeMgr = new NodeManager({ x: 100, y: 100 });
+	let nodeMgr = new NodeManager(new Vec2(100, 100));
 	let simScale = 3;
 	let showRandom = true;
 	let showMut = true;
+	let perfTimes: Array<number> = [];
 
-	let lastNodeList: Array<LivingNode> = [];
+	let lastNodeList: Array<{x: number, y: number, last_operation: number }> = [];
 
 	let runner = async () => {
 		let start = performance.now();
 		for (let i = 0; i < 4; i++) nodeMgr.tick();
 		let end = performance.now();
-		//console.log(`tick took ${end - start}`);
-		lastNodeList = nodeMgr.nodes;
+		perfTimes.push(end - start);
+		if(perfTimes.length > 300)
+			perfTimes.shift();
+		
+		lastNodeList = nodeMgr.get_nodes();
 
 		setTimeout(runner, 0);
 	};
@@ -37,20 +38,18 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 	};
 
 	p.setup = () => {
-		
-		nodeMgr = new NodeManager({
-			x: window.innerWidth / simScale,
-			y: window.innerHeight / simScale,
-		});
+		nodeMgr = new NodeManager(new Vec2(
+			window.innerWidth / simScale,
+			window.innerHeight / simScale,
+		));
 		setTimeout(runner, 8);
-		
 
 		p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
 		window.onresize = function () {
-			nodeMgr = new NodeManager({
-				x: window.innerWidth / simScale,
-				y: window.innerHeight / simScale,
-			});
+			nodeMgr = new NodeManager(new Vec2(
+				window.innerWidth / simScale,
+				window.innerHeight / simScale,
+			));
 			
 			p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
 		};
@@ -63,32 +62,49 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 		p.background(0);
 		p.fill(200);
 		p.textSize(32);
+
+		if(perfTimes.length > 0){
+			let avgPerf = 0;
+			perfTimes.forEach(p => {
+				avgPerf += p;
+			})
+			avgPerf /= perfTimes.length;
+			p.text(
+				"ms/iter: " + avgPerf.toFixed(2),
+				10,
+				30
+			);
+		}
+
+		/*
+		let replacementCandidates: Array<{fit: number, logic: any, num_used: number}> = nodeMgr.get_replacement_candidates();
+
 		p.text(
-			"Avg Fitness in top "+nodeMgr.replacementCandidates.length+": " +
+			"Avg Fitness in top "+replacementCandidates.length+": " +
 			(
-				nodeMgr.totalFitness / nodeMgr.replacementCandidates.length
+				nodeMgr.total_fitness / replacementCandidates.length
 			).toFixed(2),
 			window.innerWidth / 2,
 			30
 		);
-		if (nodeMgr.replacementCandidates.length > 0) {
+		if (replacementCandidates.length > 0) {
 			p.text(
 				"Top Fitness: " +
-				nodeMgr.replacementCandidates[0].fit.toFixed(2),
+				replacementCandidates[0].fit.toFixed(2),
 				window.innerWidth / 2,
 				60
 			);
 			p.text(
 				"Top Rates: " +
-				nodeMgr.replacementCandidates[0].logic.mutation_rate.toFixed(
+				replacementCandidates[0].logic.mutation_rate.toFixed(
 					4
 				) +
 				" " +
-				nodeMgr.replacementCandidates[0].logic.expected_weight_mutations.toFixed(
+				replacementCandidates[0].logic.expected_weight_mutations.toFixed(
 					4
 				) +
 				" " +
-				nodeMgr.replacementCandidates[0].logic.expected_bias_mutations.toFixed(
+				replacementCandidates[0].logic.expected_bias_mutations.toFixed(
 					4
 				) +
 				" ",
@@ -97,15 +113,15 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 			);
 			let avgMut = 0;
 			let avgWeightMut = 0, avgBiasMut = 0;
-			nodeMgr.replacementCandidates.forEach((e) => {
+			replacementCandidates.forEach((e) => {
 				avgMut += e.logic.mutation_rate;
 				avgWeightMut += e.logic.expected_weight_mutations;
 				avgBiasMut += e.logic.expected_bias_mutations
 			});
 
-			avgMut /= nodeMgr.replacementCandidates.length;
-			avgWeightMut /= nodeMgr.replacementCandidates.length;
-			avgBiasMut /=  nodeMgr.replacementCandidates.length;
+			avgMut /= replacementCandidates.length;
+			avgWeightMut /= replacementCandidates.length;
+			avgBiasMut /=  replacementCandidates.length;
 
 			p.text(
 				"Avg Rates: " +
@@ -117,13 +133,13 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 				" ",
 				window.innerWidth / 2,
 				120
-			);
+			);*/
 			p.text(
 				"Epoch: "+nodeMgr.epoch,
 				window.innerWidth / 2,
 				150
 			);
-		}
+		//}
 
 		//nodeMgr.targetPos.x = locX;
 		//nodeMgr.targetPos.y = locY;
@@ -138,25 +154,27 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 		p.noStroke();
 		p.fill(255);
 		
-
 		lastNodeList.forEach((e) => {
-			if(e.logic.last_operation === OperationType.Random && !showRandom)
+			if (e.last_operation == OperationType.Random && showRandom === false)
 				return;
-			if(e.logic.last_operation === OperationType.Mutation && !showMut)
+			if (e.last_operation == OperationType.Mutation && showMut === false)
 				return;
-			if(e.logic.last_operation === OperationType.Random)
+			if (e.last_operation == OperationType.Random)
 				p.fill(150, 150, 255);
-			else if(e.logic.last_operation === OperationType.ParameterMutation)
+			else if (e.last_operation == OperationType.ParameterMutation)
 				p.fill(255, 100, 100);
-			else
+			else {
 				p.fill(255);
-			p.circle(e.pos.x * simScale, e.pos.y * simScale, 5);
+			}
+				
+			
+			p.circle(e.x * simScale, e.y * simScale, 5);
 		});
 
 		p.noFill();
 		p.stroke(255, 50, 50);
 		p.strokeWeight(5);
-		p.circle(nodeMgr.targetPos.x * simScale, nodeMgr.targetPos.y * simScale, 20);
+		p.circle(nodeMgr.target_pos.x * simScale, nodeMgr.target_pos.y * simScale, 20);
 		
 	};
 }
@@ -169,9 +187,9 @@ export default function WasmGeneticSim() {
 
 	const onKeyDown = (ev: KeyboardEvent) => {
 		if(ev.key === '1')
-			setShowRandom(!showRandom); 
+			setShowRandom(showRandom === false); 
 		if(ev.key === '2')
-			setShowMut(!showMut); 
+			setShowMut(showMut === false); 
 	};
 
 	useEffect(() => {
@@ -183,7 +201,7 @@ export default function WasmGeneticSim() {
 		return () => {
 			document.removeEventListener("keydown", onKeyDown);
 		}
-	}, [])
+	}, [onKeyDown])
 
 	if(!shouldMount)
 		return (
