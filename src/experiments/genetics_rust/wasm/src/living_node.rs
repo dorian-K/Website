@@ -79,7 +79,7 @@ impl LivingNode {
         self.reward
     }
 
-    pub fn tick(&mut self, target_pos: Vec2, _new_target_timeout: f64, ticks_since_new_target: i32) {
+    pub fn tick(&mut self, target_pos: &Vec2, _new_target_timeout: f64, ticks_since_new_target: i32) {
         if self.is_dead() {
             return;
         }

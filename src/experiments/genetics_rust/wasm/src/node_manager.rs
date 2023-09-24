@@ -4,6 +4,8 @@ use wasm_bindgen::prelude::*;
 use crate::living_node::LivingNode;
 use crate::node_logic::{NodeLogic};
 use crate::vec::Vec2;
+use rayon::prelude::*;
+use std::time::Instant;
 
 #[derive(Clone)]
 #[wasm_bindgen]
@@ -136,18 +138,23 @@ impl NodeManager {
             self.bounds.y * 0.5 + f64::cos(self.ticks_since_new_target as f64 / 100.0) * radius
         );
 
-        for n in self.nodes.iter_mut() {
-            if n.is_dead() {
-                continue;
-            }
-            n.tick(self.target_pos, self.find_new_target_timeout / 400.0, self.ticks_since_new_target);
-        }
+        self.nodes.par_iter_mut()
+            .for_each(|n| {
+                if n.is_dead() {
+                    return;
+                }
 
-        let any_alive = self.nodes.iter().any(|n| { !n.is_dead() });
+                n.tick(&self.target_pos, self.find_new_target_timeout / 400.0, self.ticks_since_new_target);
+            });
 
-        if any_alive {
-            return;
+        let all_dead = self.nodes.iter().all(|n| { n.is_dead() });
+
+        if all_dead {
+            self.next_epoch();
         }
+    }
+
+    fn next_epoch(&mut self) {
         // begin new epoch
         self.epoch += 1;
         self.find_new_target_timeout = 0.0;

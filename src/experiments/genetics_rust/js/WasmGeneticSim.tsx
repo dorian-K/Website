@@ -1,63 +1,92 @@
 import { P5CanvasInstance, ReactP5Wrapper, SketchProps } from "@p5-wrapper/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useEffect } from "react";
-import init from "../wasm/pkg/wasm"
-import { OperationType, NodeManager, Vec2 } from "../wasm/pkg/wasm";
+import { OperationType } from "../wasm/pkg/wasm";
+import * as Comlink from 'comlink';
+import { HandlerRet } from "./GeneticWebWorker";
 
 type MyProps = SketchProps & {
 	showRand: boolean,
-	showMut: boolean
+	showMut: boolean,
 }
 
-function drawFunc(p: P5CanvasInstance<MyProps>) {
+function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject<HandlerRet | undefined>) {
+	p.disableFriendlyErrors = true;
+
+
 	// let firstFrame = 0;
-	let nodeMgr = new NodeManager(new Vec2(100, 100));
 	let simScale = 3;
 	let showRandom = true;
 	let showMut = true;
 	let perfTimes: Array<number> = [];
 
+	let epoch = -1;
+	let targetPos = { x: -1, y: -1 };
+	let bounds = { x: 1, y: 1 };
+
 	let lastNodeList: Array<{x: number, y: number, last_operation: number }> = [];
 
+	let runnerStillRunning = false;
+
 	let runner = async () => {
-		let start = performance.now();
-		for (let i = 0; i < 4; i++) nodeMgr.tick();
-		let end = performance.now();
-		perfTimes.push(end - start);
+		if(runnerStillRunning === true || handlers.current === null)
+			return;
+		runnerStillRunning = true;
+		const data = await handlers.current!.tickGetNodes()
+		perfTimes.push(data.time);
 		if(perfTimes.length > 300)
 			perfTimes.shift();
 		
-		lastNodeList = nodeMgr.get_nodes();
-
-		setTimeout(runner, 0);
+		lastNodeList = data.lastNodeList;
+		epoch = data.epoch;
+		targetPos = data.targetPos;
+		runnerStillRunning = false;
 	};
+
+	let interv = setInterval(runner, 8);
+
+	const oldRemove = p.remove;
+	p.remove = () => {
+		oldRemove();
+		clearInterval(interv);
+	}
 
 	p.updateWithProps = (props: MyProps) => {
 		showRandom = props.showRand === true;
 		showMut = props.showMut === true;
 	};
 
+	let myFont: object | null = null;
+
+	p.preload = () => {
+		myFont = p.loadFont("Roboto-Regular.ttf");
+	}
+
 	p.setup = () => {
-		nodeMgr = new NodeManager(new Vec2(
-			window.innerWidth / simScale,
-			window.innerHeight / simScale,
-		));
-		setTimeout(runner, 8);
+		bounds = {
+			x: window.innerWidth / simScale,
+			y: window.innerHeight / simScale 
+		};
+		handlers.current!.newNodeManager(bounds.x, bounds.y);
 
 		p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
+		
 		window.onresize = function () {
-			nodeMgr = new NodeManager(new Vec2(
-				window.innerWidth / simScale,
-				window.innerHeight / simScale,
-			));
+			bounds = {
+				x: window.innerWidth / simScale,
+				y: window.innerHeight / simScale
+			};
+			handlers.current!.newNodeManager(bounds.x, bounds.y);
 			
 			p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
 		};
-		// firstFrame = p.frameCount;
 	};
 
 	p.draw = () => {
 		// let fCount = Math.max(1, p.frameCount - firstFrame - 5);
+		
+		//p.translate(-window.innerWidth / 2, -window.innerHeight / 2);
+		p.textFont(myFont!);
 		p.noStroke();
 		p.background(0);
 		p.fill(200);
@@ -135,7 +164,7 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 				120
 			);*/
 			p.text(
-				"Epoch: "+nodeMgr.epoch,
+				"Epoch: "+epoch,
 				window.innerWidth / 2,
 				150
 			);
@@ -148,8 +177,8 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 		p.strokeWeight(1);
 		//p.line(nodeMgr.bounds.x * 0.5 * simScale, 0, nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * 0.4 * simScale);
 		//p.line(nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * 0.6 * simScale, nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * simScale);
-		p.rect(nodeMgr.bounds.x * 0.45 * simScale, nodeMgr.bounds.y * 0.2 * simScale, 
-			nodeMgr.bounds.x * 0.1 * simScale, nodeMgr.bounds.y * 0.6 * simScale);
+		p.rect(bounds.x * 0.45 * simScale, bounds.y * 0.2 * simScale, 
+			bounds.x * 0.1 * simScale, bounds.y * 0.6 * simScale);
 
 		p.noStroke();
 		p.fill(255);
@@ -167,14 +196,13 @@ function drawFunc(p: P5CanvasInstance<MyProps>) {
 				p.fill(255);
 			}
 				
-			
 			p.circle(e.x * simScale, e.y * simScale, 5);
 		});
 
 		p.noFill();
 		p.stroke(255, 50, 50);
 		p.strokeWeight(5);
-		p.circle(nodeMgr.target_pos.x * simScale, nodeMgr.target_pos.y * simScale, 20);
+		p.circle(targetPos.x * simScale, targetPos.y * simScale, 20);1
 		
 	};
 }
@@ -184,6 +212,7 @@ export default function WasmGeneticSim() {
 	const [showRandom, setShowRandom] = useState(true);
 	const [showMut, setShowMut] = useState(true);
 	const [shouldMount, setShouldMount] = useState(false);
+	const handlers = useRef<HandlerRet>();
 
 	const onKeyDown = (ev: KeyboardEvent) => {
 		if(ev.key === '1')
@@ -193,9 +222,18 @@ export default function WasmGeneticSim() {
 	};
 
 	useEffect(() => {
-		init().then(() => {
+		Comlink.wrap<{handlers: Promise<HandlerRet>}>(
+			new Worker(new URL('./GeneticWebWorker.tsx', import.meta.url), {
+				type: 'module'
+			})
+		).handlers.then(handler => { 
+			handlers.current = handler;
 			setShouldMount(true);
-		});
+		}
+			)
+	}, []);
+
+	useEffect(() => {
 		document.addEventListener("keydown", onKeyDown);
 
 		return () => {
@@ -203,7 +241,7 @@ export default function WasmGeneticSim() {
 		}
 	}, [onKeyDown])
 
-	if(!shouldMount)
+	if(shouldMount === false)
 		return (
 			<div className="anim">
 				<h2>Loading webassembly...</h2>
@@ -212,7 +250,7 @@ export default function WasmGeneticSim() {
 
 	return (
 		<div className="anim">
-			<ReactP5Wrapper sketch={drawFunc} showRand={showRandom} showMut={showMut} />
+			<ReactP5Wrapper sketch={(p5: any) => { drawFunc(p5, handlers) }} showRand={showRandom} showMut={showMut} />
 		</div>
 	);
 }
