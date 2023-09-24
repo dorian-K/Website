@@ -8,7 +8,8 @@ pub struct LivingNode {
     vel: Vec2,
     pub logic: NodeLogic,
     reward: f64,
-    bounds: Vec2
+    bounds: Vec2,
+    input_buffer: Vec<f64>
 }
 
 impl LivingNode {
@@ -19,7 +20,8 @@ impl LivingNode {
             vel: Vec2 { x: 0.0, y: 0.0 },
             logic,
             reward: 0.0,
-            bounds
+            bounds,
+            input_buffer: vec![0.0; crate::node_logic::NUM_IN as usize]
         }
     }
 
@@ -79,23 +81,27 @@ impl LivingNode {
         self.reward
     }
 
-    pub fn tick(&mut self, target_pos: &Vec2, _new_target_timeout: f64, ticks_since_new_target: i32) {
-        if self.is_dead() {
-            return;
-        }
-
-        let mut action = Vec2::from_vec(self.logic.step(Vec::from([
+    pub fn get_next_action(&mut self, target_pos: Vec2) -> Vec2 {
+        let mut action = Vec2::from_slice(self.logic.step(&[
             self.pos.x / (self.bounds.x * 0.5) - 1.0,
-            self.pos.y / (self.bounds.y * 0.5) - 1.0,
-            self.vel.x,
-            self.vel.y,
-            target_pos.x / (self.bounds.x * 0.5) - 1.0,
-            target_pos.y / (self.bounds.y * 0.5) - 1.0
-        ])));
+             self.pos.y / (self.bounds.y * 0.5) - 1.0,
+             self.vel.x,
+             self.vel.y,
+             target_pos.x / (self.bounds.x * 0.5) - 1.0,
+             target_pos.y / (self.bounds.y * 0.5) - 1.0
+         ]));
 
         let action_mag = action.length();
         if action_mag > 1.0 {
             action._div(action_mag);
+        }
+
+        action
+    }
+
+    pub fn tick(&mut self, target_pos: Vec2, action: Vec2, ticks_since_new_target: i32) {
+        if self.is_dead() {
+            return;
         }
 
         self.vel.x += action.x.clamp(-1.0, 1.0) * 0.02;

@@ -32,7 +32,7 @@ type HandlerRet = {
 async function initHandlers(): Promise<HandlerRet> {
    
     await init();
-    await wasm.initThreadPool(1);
+    await wasm.initThreadPool(navigator.hardwareConcurrency);
 
     return Comlink.proxy({
         newNodeManager,

@@ -13,11 +13,13 @@ fn gaussian_random(stddev: f64) -> f64 {
 #[derive(Clone)]
 pub struct Layer {
 	weights: Vec<Vec<f64>>,
-	biases: Vec<f64>
+	biases: Vec<f64>,
+	output_buffer: Vec<f64>
 }
 impl Layer {
 	pub fn new(weights: Vec<Vec<f64>>, biases: Vec<f64>) -> Layer {
-		Layer { weights, biases }
+		let output_buffer =  vec![0.0; biases.len()];
+		Layer { weights, biases, output_buffer }
 	}
 	fn rand(num_in: i32, num_out: i32) -> Layer {
 		let mut weights: Vec<Vec<f64>> = Vec::with_capacity(num_out as usize);
@@ -36,10 +38,10 @@ impl Layer {
 			}
 
 			weights.push(a);
-			biases.push(0.0);
+			biases.push(gaussian_random(1.0 / (num_out * num_out) as f64));
 		}
 
-		Layer { weights, biases }
+		Layer::new(weights, biases)
 	}
 
 	fn mutate(&self, mutation_rate: f64, expected_weight_mutations: f64, expected_bias_mutations: f64) -> Layer {
@@ -84,24 +86,18 @@ impl Layer {
 		x.tanh()
 	}
 
-	fn forward(&self, input: Vec<f64>) -> Vec<f64> {
+	fn forward(&mut self, input: &[f64]) -> &Vec<f64> {
 		assert_eq!(input.len(), self.weights[0].len());
 
-		self.biases
-			.iter()
-			.zip(&self.weights)
-			.map(|(bias, weights)| {
-				let dot_product = input
-					.iter()
-					.zip(weights.iter())
-					.map(|(&x, &w)| x * w)
-					.sum::<f64>();
-				bias + dot_product
-			})
-			.map(|val| {
-				self.activation(val)
-			})
-			.collect()
+		for i in 0..self.biases.len() {
+			let mut val = self.biases[i];
+			for b in 0..self.weights[i].len() {
+				val += input[b] * self.weights[i][b];
+			}
+			self.output_buffer[i] = self.activation(val);
+		}
+
+		&self.output_buffer
 	}
 }
 
@@ -129,24 +125,28 @@ pub struct NodeLogic {
 	pub mutation_rate: f64,
 	pub expected_weight_mutations: f64,
 	pub expected_bias_mutations: f64,
-	//pub last_output: Vec<f64>,
-	pub last_operation: OperationType
+	pub last_operation: OperationType,
+	output_buffer: Vec<f64>
 }
 
+const NUM_LAYERS: usize = 4;
+pub const NUM_IN: i32 = 6;
+const NUM_OUT: i32 = 2;
+
 impl NodeLogic {
-	pub fn step(&mut self, obj: Vec<f64>) -> Vec<f64> {
+	pub fn step(&mut self, obj: &[f64]) -> &[f64] {
 		let mut inp = obj;
 
-		for layer in self.layers.iter() {
+		for layer in self.layers.iter_mut() {
 			inp = layer.forward(inp)
 		}
 
-		inp
+		self.output_buffer.clear();
+		self.output_buffer.extend(inp);
+		&self.output_buffer
 	}
 	pub fn random() -> NodeLogic {
-		const NUM_LAYERS: usize = 4;
-		const NUM_IN: i32 = 6;
-		const NUM_OUT: i32 = 2;
+
 		let mut layers = Vec::with_capacity(NUM_LAYERS);
 
 		let mut last_out = NUM_IN;
@@ -208,7 +208,8 @@ impl NodeLogic {
 			expected_weight_mutations: expected_weight_mutations.clamp(0.01, 999999f64),
 			expected_bias_mutations: expected_bias_mutations.clamp(0.01, 999999f64),
 			//last_output,
-			last_operation
+			last_operation,
+			output_buffer: Vec::with_capacity(2)
 		}
 	}
 }

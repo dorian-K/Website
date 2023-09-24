@@ -13,7 +13,6 @@ type MyProps = SketchProps & {
 function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject<HandlerRet | undefined>) {
 	p.disableFriendlyErrors = true;
 
-
 	// let firstFrame = 0;
 	let simScale = 3;
 	let showRandom = true;
@@ -27,9 +26,13 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 	let lastNodeList: Array<{x: number, y: number, last_operation: number }> = [];
 
 	let runnerStillRunning = false;
+	let runnerShouldStop = false;
+	let myFont: object | null = null;
+
+	console.log("draw func");
 
 	let runner = async () => {
-		if(runnerStillRunning === true || handlers.current === null)
+		if(runnerStillRunning === true || handlers.current === null || runnerShouldStop === true)
 			return;
 		runnerStillRunning = true;
 		const data = await handlers.current!.tickGetNodes()
@@ -41,22 +44,19 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 		epoch = data.epoch;
 		targetPos = data.targetPos;
 		runnerStillRunning = false;
+		runner();
 	};
-
-	let interv = setInterval(runner, 8);
 
 	const oldRemove = p.remove;
 	p.remove = () => {
 		oldRemove();
-		clearInterval(interv);
+		runnerShouldStop = true;
 	}
 
 	p.updateWithProps = (props: MyProps) => {
 		showRandom = props.showRand === true;
 		showMut = props.showMut === true;
 	};
-
-	let myFont: object | null = null;
 
 	p.preload = () => {
 		myFont = p.loadFont("Roboto-Regular.ttf");
@@ -68,6 +68,8 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 			y: window.innerHeight / simScale 
 		};
 		handlers.current!.newNodeManager(bounds.x, bounds.y);
+		//interv = setInterval(runner, 1);
+		runner();
 
 		p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
 		
@@ -213,6 +215,7 @@ export default function WasmGeneticSim() {
 	const [showMut, setShowMut] = useState(true);
 	const [shouldMount, setShouldMount] = useState(false);
 	const handlers = useRef<HandlerRet>();
+	const [sketchFunc, _] = useState([(p5: any) => { drawFunc(p5, handlers) }]);
 
 	const onKeyDown = (ev: KeyboardEvent) => {
 		if(ev.key === '1')
@@ -222,6 +225,7 @@ export default function WasmGeneticSim() {
 	};
 
 	useEffect(() => {
+		console.log("wrapping comlink");
 		Comlink.wrap<{handlers: Promise<HandlerRet>}>(
 			new Worker(new URL('./GeneticWebWorker.tsx', import.meta.url), {
 				type: 'module'
@@ -229,8 +233,7 @@ export default function WasmGeneticSim() {
 		).handlers.then(handler => { 
 			handlers.current = handler;
 			setShouldMount(true);
-		}
-			)
+		})
 	}, []);
 
 	useEffect(() => {
@@ -250,7 +253,7 @@ export default function WasmGeneticSim() {
 
 	return (
 		<div className="anim">
-			<ReactP5Wrapper sketch={(p5: any) => { drawFunc(p5, handlers) }} showRand={showRandom} showMut={showMut} />
+			<ReactP5Wrapper sketch={sketchFunc[0]} showRand={showRandom} showMut={showMut} />
 		</div>
 	);
 }

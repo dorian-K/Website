@@ -35,6 +35,12 @@ impl Vec2 {
         Vec2 { x: vec[0], y: vec[1] }
     }
 
+    pub fn from_slice(vec: &[f64]) -> Vec2 {
+        assert_eq!(vec.len(), 2);
+
+        Vec2 { x: vec[0], y: vec[1] }
+    }
+
     pub fn length(&self) -> f64 {
         (self.x * self.x + self.y * self.y).sqrt()
     }

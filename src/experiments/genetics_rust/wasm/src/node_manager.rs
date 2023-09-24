@@ -5,7 +5,7 @@ use crate::living_node::LivingNode;
 use crate::node_logic::{NodeLogic};
 use crate::vec::Vec2;
 use rayon::prelude::*;
-use std::time::Instant;
+extern crate web_sys;
 
 #[derive(Clone)]
 #[wasm_bindgen]
@@ -38,6 +38,23 @@ pub struct NodeRepr {
 const NUM_INITIAL_NODES: usize = 1000;
 const NUM_REPLACEMENT_CANDIDATES: usize = 500;
 const MAX_USE_COUNT: i32 = 30;
+
+/*
+#[wasm_bindgen]
+extern "C" {
+    // Use `js_namespace` here to bind `console.log(..)` instead of just
+    // `log(..)`
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
+
+macro_rules! console_log {
+    // Note that this is using the `log` function imported above during
+    // `bare_bones`
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}*/
+
+
 
 #[wasm_bindgen]
 impl NodeManager {
@@ -143,8 +160,8 @@ impl NodeManager {
                 if n.is_dead() {
                     return;
                 }
-
-                n.tick(&self.target_pos, self.find_new_target_timeout / 400.0, self.ticks_since_new_target);
+                let act = n.get_next_action(self.target_pos);
+                n.tick(self.target_pos, act, self.ticks_since_new_target);
             });
 
         let all_dead = self.nodes.iter().all(|n| { n.is_dead() });
