@@ -75,12 +75,12 @@ function NewHome() {
 							<br />
 							One page displays a <b>QR code</b>, while the second page allows you to input an URL.
 							<br /><b> Scan the QR code with your phone</b>, enter the URL on the second page, and click "Submit" to view the web page on the big screen.
-							<br /><b>Never manually type presentation URL's again!</b>
+							<br /><b>Never manually type presentation URLs again!</b>
 
 						</Card>
 						<Card title="Genetic Simulation">
 							<div>
-								<button type="button" className="btn btn-primary mb-2" onClick={() => {navigate("/g")}}>
+								<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => {navigate("/g")}}>
 									Open
 									<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
 								</button>
@@ -90,6 +90,7 @@ function NewHome() {
 								</button>
 							</div>
 							Train a neural network to follow a red circle using a <b>Genetic Algorithm</b>.
+							The <b>WebAssembly</b> version uses multithreading.
 						</Card>
 					</div>
 
@@ -120,32 +121,37 @@ function NewHome() {
 					}}
 				></input>
 			</div>
-			<div className="flex-row align-items-center justify-content-center m-0 mt-4 w-100 d-flex justify-content-evenly"
-				style={{
-					position: "fixed",
-					bottom: "1.5em",
-					zIndex: 1
-				}}
-			>
-				<button type="button" className="btn btn-primary mb-2" style={{width: "auto"}} onClick={() => {setMakeTextTransparent(!makeTextTransparent)}}>
-					{makeTextTransparent ? "Show Content" : "Hide Content"}
-				</button>
-				{makeTextTransparent ? <>
-					<button type="button" className="btn btn-secondary mb-2" style={{width: "auto"}} onClick={() => {setShowVelocity(!showVelocity)}}>
+			<div className="w-100" style={{
+				position: "fixed",
+				bottom: "1.5em",
+				zIndex: 1
+			}}>
+				<div className="flex-row  align-items-center justify-content-center m-0 mt-4 w-100 d-flex" >
+					<button type="button" className="btn btn-primary mb-2" style={{ width: "auto" }} onClick={() => { setMakeTextTransparent(!makeTextTransparent) }}>
+						{makeTextTransparent ? "Show Content" : "Hide Content"}
+					</button>
+				</div>
+				<div className="flex-row align-items-center justify-content-center m-0 mt-4 w-100 d-flex"
+					
+				>
+					
+					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0"}`} style={{ width: "auto" }} onClick={() => { setShowVelocity(!showVelocity) }}>
 						{showVelocity ? "Hide Velocity" : "Show Velocity"}
 					</button>
-					<button type="button" className="btn btn-secondary mb-2" style={{width: "auto"}} onClick={() => {setShowCenter(!showCenter)}}>
+					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0"}`} style={{ width: "auto" }} onClick={() => { setShowCenter(!showCenter) }}>
 						{showCenter ? "Hide Center" : "Show Center"}
 					</button>
-					<button type="button" className="btn btn-secondary mb-2" disabled={numBodies >= 10} style={{width: "auto"}} onClick={() => {setNumBodies(Math.min(10, numBodies + 1))}}>
+					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0"}`} disabled={numBodies >= 10} style={{ width: "auto" }} onClick={() => { setNumBodies(Math.min(10, numBodies + 1)) }}>
 						Add Body
 					</button>
-					<button type="button" className="btn btn-secondary mb-2" disabled={numBodies <= 2} style={{width: "auto"}} onClick={() => {setNumBodies(Math.max(2, numBodies - 1))}}>
+					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0"}`} disabled={numBodies <= 2} style={{ width: "auto" }} onClick={() => { setNumBodies(Math.max(2, numBodies - 1)) }}>
 						Remove Body
 					</button>
-				</> : <></>}
-				
+					
+
+				</div>
 			</div>
+			
 		</>
 	);
 }

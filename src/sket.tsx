@@ -85,12 +85,13 @@ export function sketch2(p: P5CanvasInstance<PropsType2>) {
 	p.setup = () => {
 		p.createCanvas(window.innerWidth, window.innerHeight, p.WEBGL);
 		window.onresize = function () {
-			p.createCanvas(window.innerWidth, window.innerHeight, p.WEBGL);
+			p.resizeCanvas(window.innerWidth, window.innerHeight);
 		};
 	};
 
 	p.updateWithProps = (props: PropsType2) => {
 		try {
+			
 			showVelocity = props.showVelocity;
 			showCenter = props.showCenter;
 			let newNumBodies = Math.max(2, props.numBodies);
@@ -102,7 +103,7 @@ export function sketch2(p: P5CanvasInstance<PropsType2>) {
 				objects.push(newObj);
 			}
 		} catch (e) {
-			
+			console.error(e);	
 		}
 	};
 
@@ -211,7 +212,6 @@ export function sketch2(p: P5CanvasInstance<PropsType2>) {
 			objects[0].draw(p, showVelocity);
 		}
 		
-		
 		p.noLights();
 		p.ambientLight(50, 50, 50);
 		p.pointLight(255, 240, 200, 0, 0, 0);
@@ -229,7 +229,7 @@ export function sketch(p: P5CanvasInstance<PropsType>) {
 	p.setup = () => {
 		p.createCanvas(window.innerWidth, window.innerHeight, p.WEBGL);
 		window.onresize = function () {
-			p.createCanvas(window.innerWidth, window.innerHeight, p.WEBGL);
+			p.resizeCanvas(window.innerWidth, window.innerHeight);
 		};
 		firstFrame = p.frameCount;
 	};

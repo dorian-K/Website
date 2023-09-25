@@ -14,7 +14,7 @@ pub struct LivingNode {
 impl LivingNode {
     pub fn new(logic: NodeLogic, bounds: Vec2, pos: Vec2) -> LivingNode {
         LivingNode {
-            health: 1400,
+            health: 2000,
             pos,
             vel: Vec2 { x: 0.0, y: 0.0 },
             logic,

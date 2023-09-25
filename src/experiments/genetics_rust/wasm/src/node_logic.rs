@@ -38,7 +38,7 @@ impl Layer {
 			}
 
 			weights.push(a);
-			biases.push(gaussian_random(1.0 / num_out as f64));
+			biases.push(0.0);
 		}
 
 		Layer::new(weights, biases)

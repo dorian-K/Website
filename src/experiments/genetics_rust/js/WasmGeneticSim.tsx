@@ -27,9 +27,9 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 
 	let runnerStillRunning = false;
 	let runnerShouldStop = false;
-	let myFont: object | null = null;
+	//let myFont: object | null = null;
 
-	console.log("draw func");
+	//console.log("draw func");
 
 	let runner = async () => {
 		if(runnerStillRunning === true || handlers.current === null || runnerShouldStop === true)
@@ -59,7 +59,7 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 	};
 
 	p.preload = () => {
-		myFont = p.loadFont("Roboto-Regular.ttf");
+		//myFont = p.loadFont("Roboto-Regular.ttf");
 	}
 
 	p.setup = () => {
@@ -80,7 +80,7 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 			};
 			handlers.current!.newNodeManager(bounds.x, bounds.y);
 			
-			p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
+			p.resizeCanvas(window.innerWidth, window.innerHeight);
 		};
 	};
 
@@ -88,7 +88,7 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 		// let fCount = Math.max(1, p.frameCount - firstFrame - 5);
 		
 		//p.translate(-window.innerWidth / 2, -window.innerHeight / 2);
-		p.textFont(myFont!);
+		//p.textFont(myFont!);
 		p.noStroke();
 		p.background(0);
 		p.fill(200);
