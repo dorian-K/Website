@@ -1,5 +1,4 @@
 use wasm_bindgen::prelude::*;
-use rayon::prelude::*;
 mod node_logic;
 mod living_node;
 mod node_manager;

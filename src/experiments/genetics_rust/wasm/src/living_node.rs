@@ -9,7 +9,6 @@ pub struct LivingNode {
     pub logic: NodeLogic,
     reward: f64,
     bounds: Vec2,
-    input_buffer: Vec<f64>
 }
 
 impl LivingNode {
@@ -20,11 +19,11 @@ impl LivingNode {
             vel: Vec2 { x: 0.0, y: 0.0 },
             logic,
             reward: 0.0,
-            bounds,
-            input_buffer: vec![0.0; crate::node_logic::NUM_IN as usize]
+            bounds
         }
     }
 
+    #[inline(always)]
     pub fn is_dead(&self) -> bool {
         self.health <= 0
     }
@@ -77,6 +76,7 @@ impl LivingNode {
         }
     }
 
+    #[inline(always)]
     pub fn get_fitness(&self) -> f64 {
         self.reward
     }
@@ -120,10 +120,7 @@ impl LivingNode {
             let dist = self.pos.sub(&target_pos).length();
             let max_dist = self.bounds.length();
 
-            self.reward += 1.0 - dist / max_dist;
-            if dist < max_dist * 0.05 {
-                self.reward += 0.5;
-            }
+            self.reward += 1.0 - (dist * dist) / (max_dist * max_dist);
         }
 
         self.health -= 1;

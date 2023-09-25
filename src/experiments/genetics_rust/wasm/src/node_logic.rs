@@ -38,7 +38,7 @@ impl Layer {
 			}
 
 			weights.push(a);
-			biases.push(gaussian_random(1.0 / (num_out * num_out) as f64));
+			biases.push(gaussian_random(1.0 / num_out as f64));
 		}
 
 		Layer::new(weights, biases)
@@ -82,10 +82,12 @@ impl Layer {
 		Layer::new(new_weights, new_biases)
 	}
 
-	fn activation(&self, x: f64) -> f64 {
+	#[inline(always)]
+	fn activation(x: f64) -> f64 {
 		x.tanh()
 	}
 
+	#[inline]
 	fn forward(&mut self, input: &[f64]) -> &Vec<f64> {
 		assert_eq!(input.len(), self.weights[0].len());
 
@@ -94,7 +96,7 @@ impl Layer {
 			for b in 0..self.weights[i].len() {
 				val += input[b] * self.weights[i][b];
 			}
-			self.output_buffer[i] = self.activation(val);
+			self.output_buffer[i] = Layer::activation(val);
 		}
 
 		&self.output_buffer
@@ -143,6 +145,7 @@ impl NodeLogic {
 
 		self.output_buffer.clear();
 		self.output_buffer.extend(inp);
+
 		&self.output_buffer
 	}
 	pub fn random() -> NodeLogic {
