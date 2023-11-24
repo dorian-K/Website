@@ -90,7 +90,7 @@ function NewHome() {
 								</button>
 							</div>
 							Train a neural network to follow a red circle using a <b>Genetic Algorithm</b>.
-							The <b>WebAssembly</b> version uses multithreading.
+							The <b>WASM</b> version uses WebAssembly.
 						</Card>
 					</div>
 

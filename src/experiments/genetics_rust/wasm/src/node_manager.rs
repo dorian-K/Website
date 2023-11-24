@@ -4,7 +4,7 @@ use wasm_bindgen::prelude::*;
 use crate::living_node::LivingNode;
 use crate::node_logic::{NodeLogic};
 use crate::vec::Vec2;
-use rayon::prelude::*;
+// use rayon::prelude::*;
 extern crate web_sys;
 
 #[derive(Clone)]
@@ -148,7 +148,7 @@ impl NodeManager {
             )
         }*/
 
-        self.nodes.par_iter_mut()
+        self.nodes.iter_mut()
             .for_each(|n| {
                 if n.is_dead() {
                     return;

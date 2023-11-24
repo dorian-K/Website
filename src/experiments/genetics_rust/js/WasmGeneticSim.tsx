@@ -23,7 +23,7 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 	let targetPos = { x: -1, y: -1 };
 	let bounds = { x: 1, y: 1 };
 
-	let lastNodeList: Array<{x: number, y: number, last_operation: number }> = [];
+	let lastNodeList: Array<{ x: number, y: number, last_operation: number }> = [];
 
 	let runnerStillRunning = false;
 	let runnerShouldStop = false;
@@ -32,14 +32,14 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 	//console.log("draw func");
 
 	let runner = async () => {
-		if(runnerStillRunning === true || handlers.current === null || runnerShouldStop === true)
+		if (runnerStillRunning === true || handlers.current === null || runnerShouldStop === true)
 			return;
 		runnerStillRunning = true;
 		const data = await handlers.current!.tickGetNodes()
 		perfTimes.push(data.time);
-		if(perfTimes.length > 300)
+		if (perfTimes.length > 300)
 			perfTimes.shift();
-		
+
 		lastNodeList = data.lastNodeList;
 		epoch = data.epoch;
 		targetPos = data.targetPos;
@@ -65,28 +65,28 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 	p.setup = () => {
 		bounds = {
 			x: window.innerWidth / simScale,
-			y: window.innerHeight / simScale 
+			y: window.innerHeight / simScale
 		};
 		handlers.current!.newNodeManager(bounds.x, bounds.y);
 		//interv = setInterval(runner, 1);
 		runner();
 
 		p.createCanvas(window.innerWidth, window.innerHeight, p.P2D);
-		
+
 		window.onresize = function () {
 			bounds = {
 				x: window.innerWidth / simScale,
 				y: window.innerHeight / simScale
 			};
 			handlers.current!.newNodeManager(bounds.x, bounds.y);
-			
+
 			p.resizeCanvas(window.innerWidth, window.innerHeight);
 		};
 	};
 
 	p.draw = () => {
 		// let fCount = Math.max(1, p.frameCount - firstFrame - 5);
-		
+
 		//p.translate(-window.innerWidth / 2, -window.innerHeight / 2);
 		//p.textFont(myFont!);
 		p.noStroke();
@@ -94,7 +94,7 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 		p.fill(200);
 		p.textSize(32);
 
-		if(perfTimes.length > 0){
+		if (perfTimes.length > 0) {
 			let avgPerf = 0;
 			perfTimes.forEach(p => {
 				avgPerf += p;
@@ -165,11 +165,11 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 				window.innerWidth / 2,
 				120
 			);*/
-			p.text(
-				"Epoch: "+epoch,
-				window.innerWidth / 2,
-				150
-			);
+		p.text(
+			"Epoch: " + epoch,
+			window.innerWidth / 2,
+			150
+		);
 		//}
 
 		//nodeMgr.targetPos.x = locX;
@@ -179,12 +179,12 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 		p.strokeWeight(1);
 		//p.line(nodeMgr.bounds.x * 0.5 * simScale, 0, nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * 0.4 * simScale);
 		//p.line(nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * 0.6 * simScale, nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * simScale);
-		p.rect(bounds.x * 0.45 * simScale, bounds.y * 0.2 * simScale, 
+		p.rect(bounds.x * 0.45 * simScale, bounds.y * 0.2 * simScale,
 			bounds.x * 0.1 * simScale, bounds.y * 0.6 * simScale);
 
 		p.noStroke();
 		p.fill(255);
-		
+
 		lastNodeList.forEach((e) => {
 			if (e.last_operation == OperationType.Random && showRandom === false)
 				return;
@@ -197,15 +197,15 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 			else {
 				p.fill(255);
 			}
-				
+
 			p.circle(e.x * simScale, e.y * simScale, 5);
 		});
 
 		p.noFill();
 		p.stroke(255, 50, 50);
 		p.strokeWeight(5);
-		p.circle(targetPos.x * simScale, targetPos.y * simScale, 20);1
-		
+		p.circle(targetPos.x * simScale, targetPos.y * simScale, 20); 1
+
 	};
 }
 
@@ -218,19 +218,19 @@ export default function WasmGeneticSim() {
 	const [sketchFunc, _] = useState([(p5: any) => { drawFunc(p5, handlers) }]);
 
 	const onKeyDown = (ev: KeyboardEvent) => {
-		if(ev.key === '1')
-			setShowRandom(showRandom === false); 
-		if(ev.key === '2')
-			setShowMut(showMut === false); 
+		if (ev.key === '1')
+			setShowRandom(showRandom === false);
+		if (ev.key === '2')
+			setShowMut(showMut === false);
 	};
 
 	useEffect(() => {
 		console.log("wrapping comlink");
-		Comlink.wrap<{handlers: Promise<HandlerRet>}>(
+		Comlink.wrap<{ handlers: Promise<HandlerRet> }>(
 			new Worker(new URL('./GeneticWebWorker.tsx', import.meta.url), {
 				type: 'module'
 			})
-		).handlers.then(handler => { 
+		).handlers.then(handler => {
 			handlers.current = handler;
 			setShouldMount(true);
 		})
@@ -244,7 +244,7 @@ export default function WasmGeneticSim() {
 		}
 	}, [onKeyDown])
 
-	if(shouldMount === false)
+	if (shouldMount === false)
 		return (
 			<div className="anim">
 				<h2>Loading webassembly...</h2>

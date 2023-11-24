@@ -7,14 +7,14 @@ function newNodeManager(x: number, y: number) {
     nodeMgr = new wasm.NodeManager(new wasm.Vec2(x, y));
 }
 
-function tickGetNodes(){
+function tickGetNodes() {
     if (nodeMgr === null)
         throw new Error("Node manager null");
 
     let start = performance.now();
     for (let i = 0; i < 4; i++) nodeMgr.tick();
     let end = performance.now();
-   
+
     let lastNodeList = nodeMgr.get_nodes() as Array<{ x: number, y: number, last_operation: number }>;
     return {
         time: end - start,
@@ -30,9 +30,9 @@ type HandlerRet = {
 } & Comlink.ProxyMarked;
 
 async function initHandlers(): Promise<HandlerRet> {
-   
+
     await init();
-    await wasm.initThreadPool(navigator.hardwareConcurrency);
+    // await wasm.initThreadPool(navigator.hardwareConcurrency);
 
     return Comlink.proxy({
         newNodeManager,
