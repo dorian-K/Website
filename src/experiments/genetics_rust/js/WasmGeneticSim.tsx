@@ -1,9 +1,11 @@
-import { P5CanvasInstance, ReactP5Wrapper, SketchProps } from "@p5-wrapper/react";
+import type { P5CanvasInstance, SketchProps } from "@p5-wrapper/react";
 import { useRef, useState } from "react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { OperationType } from "../wasm/pkg/wasm";
 import * as Comlink from 'comlink';
 import { HandlerRet } from "./GeneticWebWorker";
+
+const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.ReactP5Wrapper})));
 
 type MyProps = SketchProps & {
 	showRand: boolean,
@@ -253,7 +255,7 @@ export default function WasmGeneticSim() {
 
 	return (
 		<div className="anim">
-			<ReactP5Wrapper sketch={sketchFunc[0]} showRand={showRandom} showMut={showMut} />
+			<LazyP5Wrapper sketch={sketchFunc[0]} showRand={showRandom} showMut={showMut} />
 		</div>
 	);
 }

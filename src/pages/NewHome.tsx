@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faRadio, faRightToBracket, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
-
-import { ReactP5Wrapper } from "@p5-wrapper/react";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
 import { useNavigate } from "react-router-dom";
 
+const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.ReactP5Wrapper})));
+
 function BgComponent(props: {expression?: any, showVelocity?: boolean, numBodies: number, showCenter?: boolean}) {
 	return (
 		<div className="anim" style={{pointerEvents: "auto"}}>
-			<ReactP5Wrapper sketch={sketch2} expression={props.expression} showVelocity={props.showVelocity} numBodies={props.numBodies} showCenter={props.showCenter}/>
+			<LazyP5Wrapper sketch={sketch2} expression={props.expression} showVelocity={props.showVelocity} numBodies={props.numBodies} showCenter={props.showCenter}/>
 		</div>
 	);
 }

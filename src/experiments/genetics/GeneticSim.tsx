@@ -1,9 +1,11 @@
-import { P5CanvasInstance, ReactP5Wrapper, SketchProps } from "@p5-wrapper/react";
+import type { P5CanvasInstance, SketchProps } from "@p5-wrapper/react";
 import NodeManager from "./logic/NodeManager";
 import { Mutex } from "async-mutex";
 import LivingNode from "./logic/LivingNode";
 import { useState } from "react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
+
+const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.ReactP5Wrapper})));
 
 type MyProps = SketchProps & {
 	showRand?: boolean,
@@ -197,7 +199,7 @@ export default function GeneticSim() {
 
 	return (
 		<div className="anim">
-			<ReactP5Wrapper sketch={drawFunc} showRand={showRandom} showMut={showMut} />
+			<LazyP5Wrapper sketch={drawFunc} showRand={showRandom} showMut={showMut} />
 		</div>
 	);
 }

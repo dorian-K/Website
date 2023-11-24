@@ -2,17 +2,35 @@ import  { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faRadio, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
-
 import { Link } from 'react-router-dom'
-
-import { ReactP5Wrapper } from "@p5-wrapper/react";
 import "./Home.css";
-import { sketch } from "../sket";
+import { makeSketch } from "../sket";
+import React from "react";
+
+const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.ReactP5Wrapper})));
 
 function BgComponent(props) {
+
+	const [sketch, setSketch] = useState(null);
+
+	useEffect(() => {
+		(async () => {
+			const myMath = await import("mathjs");
+			const newMath = myMath.create(myMath.all, myMath.config);
+			setSketch({"lol": makeSketch(newMath)});
+		})();
+	}, []);
+
+	if(sketch === null){
+		return (
+			<div className="anim">
+			</div>
+		);
+	}
+
 	return (
 		<div className="anim">
-			<ReactP5Wrapper sketch={sketch} expression={props.expression} />
+			<LazyP5Wrapper sketch={sketch.lol} expression={props.expression} />
 		</div>
 	);
 }
