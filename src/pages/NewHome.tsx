@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faRadio, faRightToBracket, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
@@ -10,9 +10,11 @@ const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => (
 
 function BgComponent(props: {expression?: any, showVelocity?: boolean, numBodies: number, showCenter?: boolean}) {
 	return (
-		<div className="anim" style={{pointerEvents: "auto"}}>
-			<LazyP5Wrapper sketch={sketch2} expression={props.expression} showVelocity={props.showVelocity} numBodies={props.numBodies} showCenter={props.showCenter}/>
-		</div>
+		<Suspense>
+			<div className="anim" style={{pointerEvents: "auto"}}>
+				<LazyP5Wrapper sketch={sketch2} expression={props.expression} showVelocity={props.showVelocity} numBodies={props.numBodies} showCenter={props.showCenter}/>
+			</div>
+		</Suspense>
 	);
 }
 

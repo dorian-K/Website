@@ -6,13 +6,13 @@ import Sender from "../experiments/redirector/Sender";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import GeneticSim from "../experiments/genetics/GeneticSim";
 import NewHome from "./NewHome";
-import React, { Suspense, Loader } from "react";
+import React, { Suspense } from "react";
 import WasmGeneticSim from "../experiments/genetics_rust/js/WasmGeneticSim";
 
 function App() {
 	return (
 		<>
-		<Suspense fallback={<></>}>
+		<Suspense>
 			<BrowserRouter>
 				<Routes>
 					<Route path="/g" element={<GeneticSim />} />

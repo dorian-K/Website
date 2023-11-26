@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faRadio, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
@@ -7,7 +7,7 @@ import "./Home.css";
 import { makeSketch } from "../sket";
 import React from "react";
 
-const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.ReactP5Wrapper})));
+const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({ default: obj.ReactP5Wrapper })));
 
 function BgComponent(props) {
 
@@ -17,11 +17,11 @@ function BgComponent(props) {
 		(async () => {
 			const myMath = await import("mathjs");
 			const newMath = myMath.create(myMath.all, myMath.config);
-			setSketch({"lol": makeSketch(newMath)});
+			setSketch({ "lol": makeSketch(newMath) });
 		})();
 	}, []);
 
-	if(sketch === null){
+	if (sketch === null) {
 		return (
 			<div className="anim">
 			</div>
@@ -29,9 +29,11 @@ function BgComponent(props) {
 	}
 
 	return (
-		<div className="anim">
-			<LazyP5Wrapper sketch={sketch.lol} expression={props.expression} />
-		</div>
+		<Suspense>
+			<div className="anim">
+				<LazyP5Wrapper sketch={sketch.lol} expression={props.expression} />
+			</div>
+		</Suspense>
 	);
 }
 
@@ -39,7 +41,7 @@ function Portfolio(props) {
 	let [myExpression, setMyExpression] = useState("sin(t + x * y * 0.2)");
 
 	useEffect(() => {
-	  document.title = "Dorian Koch - Portfolio"
+		document.title = "Dorian Koch - Portfolio"
 	}, [])
 
 	return (
