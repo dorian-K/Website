@@ -134,19 +134,21 @@ impl NodeManager {
         self.ticks_since_new_target += 1;
 
         let radius = f64::min(self.bounds.x * 0.15, self.bounds.y * 0.15);
+        let mut divisor = 100.0;
+        let mut center = Vec2::new(self.bounds.x * 0.3, self.bounds.y * 0.5);
+
+        if self.epoch >= 50 && self.epoch % 10 < 5 {
+            center.x = self.bounds.x * 0.7;
+            if self.epoch % 4 < 2 {
+                divisor = -divisor;
+            }
+        }
+
         self.target_pos = Vec2::new(
-            self.bounds.x * 0.3 + f64::sin(self.ticks_since_new_target as f64 / 100.0) * radius,
-            self.bounds.y * 0.5 + f64::cos(self.ticks_since_new_target as f64 / 100.0) * radius
+            center.x + f64::sin(self.ticks_since_new_target as f64 / divisor) * radius,
+            center.y + f64::cos(self.ticks_since_new_target as f64 / divisor) * radius
         );
-        /*if self.ticks_since_new_target % 500 < 250 {
-            self.target_pos = Vec2::new(
-                self.bounds.x * 0.1, self.bounds.y * 0.5
-            )
-        } else {
-            self.target_pos = Vec2::new(
-                self.bounds.x * 0.9, self.bounds.y * 0.5
-            )
-        }*/
+
 
         self.nodes.iter_mut()
             .for_each(|n| {

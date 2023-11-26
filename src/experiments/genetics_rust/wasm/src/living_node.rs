@@ -116,11 +116,11 @@ impl LivingNode {
         self.pos._add(&self.vel);
         self.snap_bounds(&prev_pos);
 
-        if self.health % 10 == 0 && ticks_since_new_target > 30 {
+        if self.health % 10 == 0 && ticks_since_new_target > 250 {
             let dist = self.pos.sub(&target_pos).length();
             let max_dist = self.bounds.length();
 
-            self.reward += 1.0 - (dist * dist) / (max_dist * max_dist);
+            self.reward += 1.0 - dist / max_dist;
         }
 
         self.health -= 1;
