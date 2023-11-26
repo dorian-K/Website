@@ -137,8 +137,10 @@ impl NodeManager {
         let mut divisor = 100.0;
         let mut center = Vec2::new(self.bounds.x * 0.3, self.bounds.y * 0.5);
 
-        if self.epoch >= 50 && self.epoch % 10 < 5 {
-            center.x = self.bounds.x * 0.7;
+        if self.epoch >= 50 {
+            if self.epoch % 10 < 5 {
+                center.x = self.bounds.x * 0.7;
+            }
             if self.epoch % 4 < 2 {
                 divisor = -divisor;
             }
