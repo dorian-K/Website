@@ -132,7 +132,7 @@ pub struct NodeLogic {
 }
 
 const NUM_LAYERS: usize = 4;
-pub const NUM_IN: i32 = 6;
+pub const NUM_IN: i32 = 7;
 const NUM_OUT: i32 = 2;
 
 impl NodeLogic {
@@ -154,7 +154,7 @@ impl NodeLogic {
 
 		let mut last_out = NUM_IN;
 		for i in 0..NUM_LAYERS {
-			let new_out = if i == NUM_LAYERS - 1 { NUM_OUT } else { 8 };
+			let new_out = if i == NUM_LAYERS - 1 { NUM_OUT } else { 20 };
 			layers.push(Layer::rand(last_out, new_out));
 			last_out = new_out;
 		}

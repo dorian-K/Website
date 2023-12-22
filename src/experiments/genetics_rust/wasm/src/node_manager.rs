@@ -1,3 +1,4 @@
+use std::cmp::min;
 use rand::Rng;
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
@@ -23,7 +24,7 @@ pub struct NodeManager {
     pub total_fitness: f64,
     pub bounds: Vec2,
     pub target_pos: Vec2,
-    find_new_target_timeout: f64,
+    find_new_target_timeout: i32,
     ticks_since_new_target: i32
 }
 
@@ -51,7 +52,7 @@ impl NodeManager {
             replacement_candidates: Vec::with_capacity(NUM_REPLACEMENT_CANDIDATES),
             bounds,
             total_fitness: 0.0,
-            find_new_target_timeout: 0.0,
+            find_new_target_timeout: 0,
             ticks_since_new_target: 0,
             target_pos: Vec2::new(0.0, 0.0)
         };
@@ -65,7 +66,7 @@ impl NodeManager {
     }
 
     pub fn get_nodes(&self) -> Result<JsValue, JsValue> {
-        let moin: Vec<NodeRepr> = self.nodes.iter().map(|n| {
+        let moin: Vec<NodeRepr> = self.nodes.iter().take(500).map(|n| {
             NodeRepr {
                 x: n.pos.x,
                 y: n.pos.y,
@@ -130,10 +131,32 @@ impl NodeManager {
     }
 
     pub fn tick(&mut self) {
-        self.find_new_target_timeout -= 1.0;
+
+        if self.find_new_target_timeout <= 0 {
+            let mut rng = rand::thread_rng();
+
+            let mut random_pos = Vec2::new(
+                rng.gen_range(0.01..0.99) * self.bounds.x,
+                rng.gen_range(0.01..0.99) * self.bounds.y
+            );
+            while random_pos.sub(&self.target_pos).length() < self.bounds.length() * 0.3 {
+                random_pos = Vec2::new(
+                    rng.gen_range(0.01..0.99) * self.bounds.x,
+                    rng.gen_range(0.01..0.99) * self.bounds.y
+                );
+            }
+
+            
+            self.target_pos = random_pos;
+
+            self.find_new_target_timeout = 600;
+            // self.ticks_since_new_target = 0;
+        }
+
+        self.find_new_target_timeout -= 1;
         self.ticks_since_new_target += 1;
 
-        let radius = f64::min(self.bounds.x * 0.15, self.bounds.y * 0.15);
+        /*let radius = f64::min(self.bounds.x * 0.15, self.bounds.y * 0.15);
         let mut divisor = 100.0;
         let mut center = Vec2::new(self.bounds.x * 0.3, self.bounds.y * 0.5);
 
@@ -149,7 +172,7 @@ impl NodeManager {
         self.target_pos = Vec2::new(
             center.x + f64::sin(self.ticks_since_new_target as f64 / divisor) * radius,
             center.y + f64::cos(self.ticks_since_new_target as f64 / divisor) * radius
-        );
+        );*/
 
 
         self.nodes.iter_mut()
@@ -157,7 +180,7 @@ impl NodeManager {
                 if n.is_dead() {
                     return;
                 }
-                let act = n.get_next_action(self.target_pos);
+                let act = n.get_next_action(self.target_pos, self.find_new_target_timeout as f64 / 600.0);
                 n.tick(self.target_pos, act, self.ticks_since_new_target);
             });
 
@@ -171,7 +194,7 @@ impl NodeManager {
     fn next_epoch(&mut self) {
         // begin new epoch
         self.epoch += 1;
-        self.find_new_target_timeout = 0.0;
+        self.find_new_target_timeout = 0;
         // all nodes are done, lets do the genetic algorithm
         // first calculate fitness and insert into replacement candidates
         self.replacement_candidates.clear();

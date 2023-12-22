@@ -181,9 +181,9 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 		p.strokeWeight(1);
 		//p.line(nodeMgr.bounds.x * 0.5 * simScale, 0, nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * 0.4 * simScale);
 		//p.line(nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * 0.6 * simScale, nodeMgr.bounds.x * 0.5 * simScale, nodeMgr.bounds.y * simScale);
-		p.rect(bounds.x * 0.45 * simScale, bounds.y * 0.2 * simScale,
+		/*p.rect(bounds.x * 0.45 * simScale, bounds.y * 0.2 * simScale,
 			bounds.x * 0.1 * simScale, bounds.y * 0.6 * simScale);
-
+*/
 		p.noStroke();
 		p.fill(255);
 
@@ -206,7 +206,7 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 		p.noFill();
 		p.stroke(255, 50, 50);
 		p.strokeWeight(5);
-		p.circle(targetPos.x * simScale, targetPos.y * simScale, 20); 1
+		p.circle(targetPos.x * simScale, targetPos.y * simScale, 30); 
 
 	};
 }

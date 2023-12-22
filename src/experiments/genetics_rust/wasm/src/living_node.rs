@@ -1,3 +1,5 @@
+use std::cmp::min;
+use web_sys::console::assert;
 use crate::node_logic::{NodeLogic};
 use crate::vec::Vec2;
 
@@ -19,7 +21,7 @@ impl LivingNode {
             vel: Vec2 { x: 0.0, y: 0.0 },
             logic,
             reward: 0.0,
-            bounds
+            bounds,
         }
     }
 
@@ -32,6 +34,7 @@ impl LivingNode {
         let size_x = 0.1 * 0.5 * self.bounds.x;
         let half_x_bound = self.bounds.x / 2.0;
 
+        /*
         if (self.pos.x > half_x_bound - size_x && prev_pos.x <= half_x_bound - size_x) ||
             (self.pos.x < half_x_bound + size_x && prev_pos.x >= half_x_bound + size_x) {
             // crossed the border via x
@@ -56,9 +59,20 @@ impl LivingNode {
                 }
                 self.vel.y = 0.0;
             }
+        }*/
+
+        if self.pos.x > self.bounds.x {
+            self.pos.x -= self.bounds.x;
+        } else if self.pos.x < 0.0 {
+            self.pos.x += self.bounds.x;
         }
 
-        // outer border
+        if self.pos.y > self.bounds.y {
+            self.pos.y -= self.bounds.y;
+        } else if self.pos.y < 0.0 {
+            self.pos.y += self.bounds.y;
+        }
+        /*// outer border
         if self.pos.x > self.bounds.x {
             self.pos.x = self.bounds.x;
             self.vel.x = 0.0;
@@ -73,7 +87,7 @@ impl LivingNode {
         } else if self.pos.y < 0.0 {
             self.pos.y = 0.0;
             self.vel.y = 0.0;
-        }
+        }*/
     }
 
     #[inline(always)]
@@ -81,15 +95,16 @@ impl LivingNode {
         self.reward
     }
 
-    pub fn get_next_action(&mut self, target_pos: Vec2) -> Vec2 {
+    pub fn get_next_action(&mut self, target_pos: Vec2, change_target_perc: f64) -> Vec2 {
         let mut action = Vec2::from_slice(self.logic.step(&[
             self.pos.x / (self.bounds.x * 0.5) - 1.0,
-             self.pos.y / (self.bounds.y * 0.5) - 1.0,
-             self.vel.x,
-             self.vel.y,
-             target_pos.x / (self.bounds.x * 0.5) - 1.0,
-             target_pos.y / (self.bounds.y * 0.5) - 1.0
-         ]));
+            self.pos.y / (self.bounds.y * 0.5) - 1.0,
+            self.vel.x,
+            self.vel.y,
+            target_pos.x / (self.bounds.x * 0.5) - 1.0,
+            target_pos.y / (self.bounds.y * 0.5) - 1.0,
+            change_target_perc * 2.0 - 1.0
+        ]));
 
         let action_mag = action.length();
         if action_mag > 1.0 {
@@ -104,8 +119,8 @@ impl LivingNode {
             return;
         }
 
-        self.vel.x += action.x.clamp(-1.0, 1.0) * 0.02;
-        self.vel.y += action.y.clamp(-1.0, 1.0) * 0.02;
+        self.vel.x += action.x.clamp(-1.0, 1.0) * 0.2;
+        self.vel.y += action.y.clamp(-1.0, 1.0) * 0.2;
 
         let vel_len = self.vel.length();
         if vel_len > 1.0 {
@@ -117,10 +132,19 @@ impl LivingNode {
         self.snap_bounds(&prev_pos);
 
         if self.health % 10 == 0 && ticks_since_new_target > 250 {
-            let dist = self.pos.sub(&target_pos).length();
-            let max_dist = self.bounds.length();
+            let mut d = self.pos.sub(&target_pos);
+            d.x = f64::abs(d.x);
+            d.y = f64::abs(d.y);
+            assert!(d.x <= self.bounds.x);
+            assert!(d.y <= self.bounds.y);
+            d.x = f64::min(d.x, self.bounds.x - d.x);
+            d.y = f64::min(d.y, self.bounds.y - d.y);
+            assert!(d.x >= 0.0);
+            assert!(d.y >= 0.0);
+            let max_dist = self.bounds.length() ;
+            assert!(d.length() <= max_dist);
 
-            self.reward += 1.0 - dist / max_dist;
+            self.reward += 1.0 - d.length() / max_dist;
         }
 
         self.health -= 1;
