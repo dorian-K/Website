@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { faRadio, faRightToBracket, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
@@ -49,15 +49,25 @@ function NewHome() {
 	const [showCenter, setShowCenter] = useState(false);
 	const [numBodies, setNumBodies] = useState(3);
 
+	// when makeTextTransparent is true, scroll will be disabled, so make sure to scroll to top
+	useEffect(() => {
+		if (makeTextTransparent) {
+			document.getElementById("text")!.scrollTo(0, 0);
+		}
+	}, [makeTextTransparent])
+
 	return (
 		<>
 			<BgComponent expression={myExpression} showVelocity={showVelocity} numBodies={numBodies} showCenter={showCenter} />
-			<div id="text" style={{display: "auto"}}>
+			<div id="text" style={{display: "auto"}} className={makeTextTransparent ? "overflow-hidden" : ""}>
 				<p className="portnametext text-white" >Dorian Koch</p>
-				<div className={"container "+ (makeTextTransparent ? "transitionout" : "transitionin")}>
+				<div className={"container "+ (makeTextTransparent ? "transitionout pe-none" : "transitionin")}>
 					<div className="d-flex flex-nowrap justify-content-center">
 						<a href="https://github.com/dorian-k" className="mx-2" title="Github">
 							<FontAwesomeIcon className="whiteicon bigfont" icon={faGithub} />
+						</a>
+						<a href="https://www.linkedin.com/in/dorian-koch-847851279" className="mx-2" title="LinkedIn">
+							<FontAwesomeIcon className="whiteicon bigfont" icon={faLinkedin} />
 						</a>
 					</div>
 					<div className="d-flex flex-wrap mt-3">
@@ -137,16 +147,16 @@ function NewHome() {
 					
 				>
 					
-					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0"}`} style={{ width: "auto" }} onClick={() => { setShowVelocity(!showVelocity) }}>
+					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0 pe-none"}`} style={{ width: "auto" }} onClick={() => { setShowVelocity(!showVelocity) }}>
 						{showVelocity ? "Hide Velocity" : "Show Velocity"}
 					</button>
-					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0"}`} style={{ width: "auto" }} onClick={() => { setShowCenter(!showCenter) }}>
+					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0 pe-none"}`} style={{ width: "auto" }} onClick={() => { setShowCenter(!showCenter) }}>
 						{showCenter ? "Hide Center" : "Show Center"}
 					</button>
-					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0"}`} disabled={numBodies >= 10} style={{ width: "auto" }} onClick={() => { setNumBodies(Math.min(10, numBodies + 1)) }}>
+					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0 pe-none"}`} disabled={numBodies >= 10} style={{ width: "auto" }} onClick={() => { setNumBodies(Math.min(10, numBodies + 1)) }}>
 						Add Body
 					</button>
-					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0"}`} disabled={numBodies <= 2} style={{ width: "auto" }} onClick={() => { setNumBodies(Math.max(2, numBodies - 1)) }}>
+					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0 pe-none"}`} disabled={numBodies <= 2} style={{ width: "auto" }} onClick={() => { setNumBodies(Math.max(2, numBodies - 1)) }}>
 						Remove Body
 					</button>
 					
