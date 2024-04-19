@@ -19,7 +19,7 @@ function BgComponent(props: {expression?: any, showVelocity?: boolean, numBodies
 }
 
 function Card(props: {title?: any, text?: any, children?: any}) {
-	return (<div className="col-md-5 flex-fill my-1">
+	return (<div className="col-md-6 my-1">
 		<div className="card mx-1"> 
 			<div className="card-body text-start">
 				<h5 className="card-title">
@@ -103,6 +103,15 @@ function NewHome() {
 							</div>
 							Train a neural network to follow a red circle using a <b>Genetic Algorithm</b>.
 							The <b>WASM</b> version uses WebAssembly.
+						</Card>
+						<Card title="RWTH Gym">
+							<div>
+								<a className="btn btn-primary mb-2 me-2" href="https://rwtf.dorianko.ch/">
+									Open
+									<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
+								</a>
+							</div>
+							View the utilization of the RWTH Aachen University gym over time and compare it with past data.
 						</Card>
 					</div>
 
