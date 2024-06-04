@@ -17,7 +17,7 @@ RUN mkdir /build && npm run build
 
 
 FROM alpine:latest
-COPY --from=0 /app/dist/ /build
+COPY --from=0 /app/dist/ /out
 
 # copy the build artifacts to /out at runtime and set permissions
-CMD cp -r /build /out && chmod -R 755 /out
+CMD chmod -R 755 /out
