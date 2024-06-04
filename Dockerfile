@@ -20,4 +20,4 @@ FROM alpine:latest
 COPY --from=0 /app/dist/ /build
 
 # copy the build artifacts to /out at runtime and set permissions
-CMD cp -r /build /out && chmod -R 755 /out
+CMD cp -r /build/* /out && chmod -R 755 /out
