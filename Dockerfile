@@ -13,11 +13,11 @@ RUN rustup component add rust-src --toolchain nightly-2023-09-23-x86_64-unknown-
 
 COPY . /app
 RUN wasm-pack build --target web /app/src/experiments/genetics_rust/wasm
-RUN mkdir /build && npm run build
+RUN npm run build
 
 
 FROM alpine:latest
-COPY --from=0 /app/dist/ /out
+COPY --from=0 /app/dist/ /build
 
 # copy the build artifacts to /out at runtime and set permissions
-CMD chmod -R 755 /out
+CMD cp -r /build /out && chmod -R 755 /out
