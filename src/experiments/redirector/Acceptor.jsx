@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import QRCode from "qrcode.react";
+import {QRCodeSVG} from "qrcode.react";
 import Measure from "react-measure";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 
@@ -67,7 +67,7 @@ function QRGen() {
 			>
 				{({ measureRef }) => (
 					<div ref={measureRef} className="qrgen">
-						<QRCode
+						<QRCodeSVG
 							value={
 								hasNumber
 									? "https://dorianko.ch/b?uid=" + myId

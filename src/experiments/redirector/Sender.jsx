@@ -59,34 +59,34 @@ function Sender() {
 		<div className="sendercontainer">
 			<div className="formInput">
 				<form onSubmit={handleSubmit}>
-					<div class="mb-3">
-						<label for="inputId" class="form-label">
+					<div className="mb-3">
+						<label htmlFor="inputId" className="form-label">
 							ID
 						</label>
 						<input
 							name="id"
 							type="number"
-							class="form-control"
+							className="form-control"
 							id="inputId"
 							aria-describedby="emailHelp"
 							value={inputState.id}
 							onChange={handleValueChange}
 						/>
 					</div>
-					<div class="mb-3">
-						<label for="inputUrl" class="form-label">
+					<div className="mb-3">
+						<label htmlFor="inputUrl" className="form-label">
 							URL
 						</label>
 						<input
 							name="url"
 							type="text"
-							class="form-control"
+							className="form-control"
 							id="inputUrl"
 							value={inputState.url}
 							onChange={handleValueChange}
 						/>
 					</div>
-					<button type="submit" class="btn btn-primary">
+					<button type="submit" className="btn btn-primary">
 						Submit
 					</button>
 				</form>
