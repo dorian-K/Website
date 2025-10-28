@@ -6,17 +6,6 @@ import "./NewHome.scss";
 import { sketch2 } from "../sket";
 import { useNavigate } from "react-router-dom";
 
-const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.ReactP5Wrapper})));
-
-function BgComponent(props: {expression?: any, showVelocity?: boolean, numBodies: number, showCenter?: boolean}) {
-	return (
-		<Suspense>
-			<div className="anim" style={{pointerEvents: "auto"}}>
-				<LazyP5Wrapper sketch={sketch2} expression={props.expression} showVelocity={props.showVelocity} numBodies={props.numBodies} showCenter={props.showCenter}/>
-			</div>
-		</Suspense>
-	);
-}
 
 function Card(props: {title?: any, text?: any, children?: any}) {
 	return (<div className="col-md-6 my-1">
@@ -45,9 +34,7 @@ function NewHome() {
 
 	const navigate = useNavigate();
 	const [makeTextTransparent, setMakeTextTransparent] = useState(false);
-	const [showVelocity, setShowVelocity] = useState(false);
-	const [showCenter, setShowCenter] = useState(false);
-	const [numBodies, setNumBodies] = useState(3);
+	
 
 	// when makeTextTransparent is true, scroll will be disabled, so make sure to scroll to top
 	useEffect(() => {
@@ -58,7 +45,6 @@ function NewHome() {
 
 	return (
 		<>
-			<BgComponent expression={myExpression} showVelocity={showVelocity} numBodies={numBodies} showCenter={showCenter} />
 			<div id="text" style={{display: "auto"}} className={makeTextTransparent ? "overflow-hidden" : ""}>
 				<p className="portnametext text-white" >Dorian Koch</p>
 				<div className={"container "+ (makeTextTransparent ? "transitionout pe-none" : "transitionin")}>
@@ -113,62 +99,20 @@ function NewHome() {
 							</div>
 							View the utilization of the RWTH Aachen University gym over time and compare it with past data.
 						</Card>
+						<Card title="Visualizations">
+							<div>
+								<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => {navigate("/sims/planets")}}>
+									Planets
+									<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
+								</button>
+								<button type="button" className="btn btn-primary mb-2" onClick={() => {navigate("/sims/graph")}}>
+									Graph
+									<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
+								</button>
+							</div>
+							
+						</Card>
 					</div>
-
-				</div>
-			</div>
-
-			<div className="row align-items-center justify-content-center m-0 mt-4 w-100"
-				style={{
-					position: "fixed",
-					bottom: "1.5em",
-					zIndex: 1,
-					display: "none"
-				}}
-			>
-				<input
-					onFocus={() => {setMakeTextTransparent(true)}}
-					onBlur={() => {setMakeTextTransparent(false)}}
-					type="text"
-					className="form-control inpanim"
-					style={{
-						maxWidth: "90%",
-						width: "600px",
-						textAlign: "center",
-					}}
-					value={myExpression}
-					onChange={(e) => {
-						setMyExpression(e.target.value);
-					}}
-				></input>
-			</div>
-			<div className="w-100" style={{
-				position: "fixed",
-				bottom: "1.5em",
-				zIndex: 1
-			}}>
-				<div className="flex-row  align-items-center justify-content-center m-0 mt-4 w-100 d-flex" >
-					<button type="button" className="btn btn-primary mb-2" style={{ width: "auto" }} onClick={() => { setMakeTextTransparent(!makeTextTransparent) }}>
-						{makeTextTransparent ? "Show Content" : "Hide Content"}
-					</button>
-				</div>
-				<div className="flex-row align-items-center justify-content-center m-0 mt-4 w-100 d-flex"
-					
-				>
-					
-					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0 pe-none"}`} style={{ width: "auto" }} onClick={() => { setShowVelocity(!showVelocity) }}>
-						{showVelocity ? "Hide Velocity" : "Show Velocity"}
-					</button>
-					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0 pe-none"}`} style={{ width: "auto" }} onClick={() => { setShowCenter(!showCenter) }}>
-						{showCenter ? "Hide Center" : "Show Center"}
-					</button>
-					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0 pe-none"}`} disabled={numBodies >= 10} style={{ width: "auto" }} onClick={() => { setNumBodies(Math.min(10, numBodies + 1)) }}>
-						Add Body
-					</button>
-					<button type="button" className={`btn btn-secondary mb-2 mx-2 ${makeTextTransparent ? "" : "opacity-0 pe-none"}`} disabled={numBodies <= 2} style={{ width: "auto" }} onClick={() => { setNumBodies(Math.max(2, numBodies - 1)) }}>
-						Remove Body
-					</button>
-					
 
 				</div>
 			</div>
