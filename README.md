@@ -2,9 +2,11 @@
 
 This is my personal website, you can access it [here](https://dorianko.ch)
 
-Most code is left uncommented, proceed at your own risk!
+## Dev
 
-## Getting started
+`cd dev && docker compose up --build`
+
+## Getting started (**OLD**)
 
 Install nodejs if you have not already done so
 
