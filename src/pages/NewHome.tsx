@@ -65,6 +65,16 @@ function NewHome() {
 						</div>
 						View the utilization of the RWTH Aachen University gym over time and compare it with past data.
 					</Card>
+					<Card title="Game Jam 2026" >
+						<div>
+							<a className="btn btn-primary mb-2 me-2" href="/gamejam-2026/index.html">
+								Open
+								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
+							</a>
+						</div>
+						My team won the 48h Game Jam 2026 contest, hosted by the student council I/1 at RWTH Aachen University.
+						Click "Open" to play our game in your browser.
+					</Card>
 					<h2 className="text-white mt-3">Other stuff</h2>
 					<Card title="Visualizations I made">
 						<div>
