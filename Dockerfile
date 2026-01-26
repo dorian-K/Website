@@ -16,6 +16,7 @@ RUN wasm-pack build --target web /app/src/experiments/genetics_rust/wasm
 RUN npm run build
 
 # RUN curl -s https://api.github.com/repos/dorian-K/gamejam-2026/releases/latest | grep "browser_download_url" | grep "upload.zip" | cut -d '"' -f 4 | xargs curl -L -o upload.zip
+RUN apt-get update && apt-get install -y jq unzip curl
 RUN curl -s https://api.github.com/repos/dorian-K/gamejam-2026/releases/latest | jq -r '.assets[] | select(.name | contains("upload.zip")) | .browser_download_url' \
 	| xargs curl -L -o upload.zip
 RUN unzip upload.zip -d /app/dist/gamejam-2026
