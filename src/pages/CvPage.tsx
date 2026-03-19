@@ -1,11 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const CV_PDF_URL = "https://raw.githubusercontent.com/dorian-K/cv/main/cv_english.pdf";
 const CV_GERMAN_URL = "https://raw.githubusercontent.com/dorian-K/cv/main/cv_german.pdf";
 const CV_REPO_URL = "https://github.com/dorian-K/cv";
+const GITHUB_API_URL = "https://api.github.com/repos/dorian-K/cv/commits?per_page=1";
 
 function CvPage() {
     const [iframeLoaded, setIframeLoaded] = useState(false);
+    const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+    const [fetchError, setFetchError] = useState<string | null>(null);
+    const [loadingTimestamp, setLoadingTimestamp] = useState(true);
+
+    useEffect(() => {
+        const fetchLastUpdated = async () => {
+            try {
+                const response = await fetch(GITHUB_API_URL);
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+                const commits = await response.json();
+                if (Array.isArray(commits) && commits.length > 0) {
+                    const commitDate = new Date(commits[0].commit.author.date);
+                    // Format as "January 24, 2026"
+                    const formatted = commitDate.toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                    });
+                    setLastUpdated(formatted);
+                } else {
+                    throw new Error("No commits found");
+                }
+            } catch (err: any) {
+                console.error("Failed to fetch last updated timestamp:", err);
+                setFetchError(err.message);
+            } finally {
+                setLoadingTimestamp(false);
+            }
+        };
+
+        fetchLastUpdated();
+    }, []);
 
     return (
         <div className="container mt-4">
@@ -62,10 +97,22 @@ function CvPage() {
                 </div>
             </div>
 
-            {/* Last updated note - placeholder for GitHub API later */}
+            {/* Last updated note */}
             <div className="mt-4 text-muted small text-center">
                 <p className="mb-0">
-                    Last updated: <span className="fw-semibold">Fetching from GitHub API soon</span>
+                    Last updated:{" "}
+                    {loadingTimestamp ? (
+                        <span className="fw-semibold">
+                            <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            fetching…
+                        </span>
+                    ) : fetchError ? (
+                        <span className="fw-semibold text-warning">Unable to fetch timestamp ({fetchError})</span>
+                    ) : lastUpdated ? (
+                        <span className="fw-semibold">{lastUpdated}</span>
+                    ) : (
+                        <span className="fw-semibold">Unknown</span>
+                    )}
                 </p>
             </div>
         </div>
