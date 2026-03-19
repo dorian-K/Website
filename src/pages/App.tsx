@@ -8,6 +8,7 @@ import GeneticSim from "../experiments/genetics/GeneticSim";
 import NewHome from "./NewHome";
 import React from "react";
 import WasmGeneticSim from "../experiments/genetics_rust/js/WasmGeneticSim";
+import CvPage from "./CvPage";
 
 const Sims = React.lazy(() => import("./Sims"));
 
@@ -22,6 +23,7 @@ function App() {
 					<Route path="/oldhome" element={<Strict><Portfolio /></Strict>} />
 					<Route path="/a" element={<Strict><Acceptor /></Strict>} />
 					<Route path="/b" element={<Strict><Sender /></Strict>} />
+					<Route path="/cv" element={<Strict><CvPage /></Strict>} />
 
 					<Route path="/sims/*" element={<Strict><React.Suspense fallback={<div>Loading...</div>}><Sims /></React.Suspense></Strict>} />
 				</Routes>
