@@ -72,8 +72,8 @@ function NewHome() {
 								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
 							</a>
 						</div>
-						My team won the 48h Game Jam 2026 contest, hosted by the student council I/1 at RWTH Aachen University.
-						Click "Open" to play our game in your browser.
+						I was part of the winning team for the 48h Game Jam 2026 contest, hosted by the student council I/1 at RWTH Aachen University.
+						Click "Open" to play the game in your browser.
 					</Card>
 					<h2 className="text-white mt-3">Other stuff</h2>
 					<Card title="Visualizations I made">
