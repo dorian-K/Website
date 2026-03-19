@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
-import { faRadio, faRightToBracket, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
+import { faRadio, faRightToBracket, faWaveSquare, faFilePdf } from "@fortawesome/free-solid-svg-icons"
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
 import { useNavigate } from "react-router-dom";
@@ -53,6 +53,9 @@ function NewHome() {
 					</a>
 					<a href="https://www.linkedin.com/in/dorian-koch-847851279" className="mx-2" title="LinkedIn">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faLinkedin} />
+					</a>
+					<a href="/cv" className="mx-2" title="Curriculum Vitae">
+						<FontAwesomeIcon className="whiteicon bigfont" icon={faFilePdf} />
 					</a>
 				</div>
 				<div className="d-flex flex-column align-items-center mt-3 w-100">
