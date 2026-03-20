@@ -67,3 +67,16 @@ a:hover {
 .mt-4, .my-4, .mb-4 {
   margin-top: 2rem !important;
 }
+
+/* CV page iframe */
+.cv-iframe,
+.cv-iframe-loading {
+    height: 800px;
+}
+
+@media (max-width: 768px) {
+    .cv-iframe,
+    .cv-iframe-loading {
+        height: 500px;
+    }
+}

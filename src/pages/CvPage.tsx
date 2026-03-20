@@ -74,7 +74,7 @@ function CvPage() {
                 </div>
                 <div className="card-body p-0 position-relative">
                     {!iframeLoaded && (
-                        <div className="d-flex justify-content-center align-items-center" style={{ height: "800px" }}>
+                        <div className="d-flex justify-content-center align-items-center cv-iframe-loading">
                             <div className="spinner-border text-primary" role="status">
                                 <span className="visually-hidden">Loading PDF...</span>
                             </div>
@@ -84,7 +84,7 @@ function CvPage() {
                         src={CV_PDF_URL}
                         title="CV PDF Viewer"
                         width="100%"
-                        height="800px"
+                        className="cv-iframe"
                         style={{ border: "none", display: iframeLoaded ? "block" : "none" }}
                         onLoad={() => setIframeLoaded(true)}
                     />
