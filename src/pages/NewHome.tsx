@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
-import { faRadio, faRightToBracket, faWaveSquare, faFilePdf } from "@fortawesome/free-solid-svg-icons"
+import { faRadio, faRightToBracket, faWaveSquare, faFilePdf, faFolderOpen } from "@fortawesome/free-solid-svg-icons"
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
 import { useNavigate } from "react-router-dom";
@@ -56,6 +56,9 @@ function NewHome() {
 					</a>
 					<a href="/cv" className="mx-2" title="Curriculum Vitae">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faFilePdf} />
+					</a>
+					<a href="/projects" className="mx-2" title="Projects">
+						<FontAwesomeIcon className="whiteicon bigfont" icon={faFolderOpen} />
 					</a>
 				</div>
 				<div className="d-flex flex-column align-items-center mt-3 w-100">
@@ -122,6 +125,15 @@ function NewHome() {
 						</div>
 						Train a neural network to follow a red circle using a <b>Genetic Algorithm</b>.
 						The <b>WASM</b> version uses WebAssembly.
+					</Card>
+					<Card title="GitHub Projects">
+						<div>
+							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => { navigate("/projects") }}>
+								View Projects
+								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
+							</button>
+						</div>
+						Browse my public GitHub repositories, sorted by stars. Includes descriptions, languages, and metrics.
 					</Card>
 				</div>
 			</div>
