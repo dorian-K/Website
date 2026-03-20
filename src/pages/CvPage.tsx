@@ -31,9 +31,15 @@ function CvPage() {
                 } else {
                     throw new Error("No commits found");
                 }
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error("Failed to fetch last updated timestamp:", err);
-                setFetchError(err.message);
+                const message =
+                    err instanceof Error
+                        ? err.message
+                        : typeof err === "string"
+                        ? err
+                        : "An unexpected error occurred while fetching the last updated timestamp.";
+                setFetchError(message);
             } finally {
                 setLoadingTimestamp(false);
             }

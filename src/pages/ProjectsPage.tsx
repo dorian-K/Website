@@ -3,7 +3,7 @@ import ProjectsSection from "../components/ProjectsSection";
 
 function ProjectsPage() {
     return (
-        <div className="container mt-4">
+        <div className="mt-4">
             <h1 className="text-white mb-4">GitHub Projects</h1>
             <p className="text-white-50 mb-5">
                 This page shows a selection of my public GitHub repositories, sorted by stars.

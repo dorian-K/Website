@@ -3,6 +3,18 @@ import RepoCard, { Repo } from "./RepoCard";
 
 const GITHUB_API_URL = "https://api.github.com/users/dorian-K/repos?sort=updated&per_page=20";
 
+interface GitHubRepo {
+    name: string;
+    description: string | null;
+    html_url: string;
+    stargazers_count: number;
+    forks_count: number;
+    watchers_count?: number;
+    language: string | null;
+    updated_at: string;
+    fork: boolean;
+}
+
 function ProjectsSection() {
     const [repos, setRepos] = useState<Repo[]>([]);
     const [loading, setLoading] = useState(true);
@@ -15,17 +27,32 @@ function ProjectsSection() {
                 if (!response.ok) {
                     throw new Error(`GitHub API error: ${response.status}`);
                 }
-                const data = await response.json();
-                // Filter out forks? maybe keep all.
-                // Sort by stars descending
+                const data: GitHubRepo[] = await response.json();
+                // Filter out forks, sort by stars descending, take top 6
                 const sorted = data
-                    .filter((repo: any) => !repo.fork) // exclude forks
-                    .sort((a: any, b: any) => b.stargazers_count - a.stargazers_count)
-                    .slice(0, 6); // top 6
+                    .filter((repo) => !repo.fork)
+                    .sort((a, b) => b.stargazers_count - a.stargazers_count)
+                    .slice(0, 6)
+                    .map((repo): Repo => ({
+                        name: repo.name,
+                        description: repo.description,
+                        html_url: repo.html_url,
+                        stargazers_count: repo.stargazers_count,
+                        forks_count: repo.forks_count,
+                        watchers_count: repo.watchers_count,
+                        language: repo.language,
+                        updated_at: repo.updated_at,
+                    }));
                 setRepos(sorted);
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error("Failed to fetch repositories:", err);
-                setError(err.message);
+                const message =
+                    err instanceof Error
+                        ? err.message
+                        : typeof err === "string"
+                        ? err
+                        : "An unexpected error occurred while fetching repositories.";
+                setError(message);
             } finally {
                 setLoading(false);
             }

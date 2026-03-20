@@ -63,10 +63,7 @@ a:hover {
   max-width: 800px;
 }
 
-/* Improve spacing */
-.mt-4, .my-4, .mb-4 {
-  margin-top: 2rem !important;
-}
+
 
 /* CV page iframe */
 .cv-iframe,
