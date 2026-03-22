@@ -5,7 +5,6 @@ import { faRadio, faRightToBracket, faWaveSquare, faFilePdf, faFolderOpen } from
 import { useNavigate } from "react-router-dom";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
-import { useNavigate } from "react-router-dom";
 
 
 function Card(props: { title?: any, text?: any, children?: any, size?: number }) {
