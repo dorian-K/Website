@@ -1,10 +1,10 @@
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
-import { faRadio, faRightToBracket, faWaveSquare } from "@fortawesome/free-solid-svg-icons"
+import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
-import { useNavigate } from "react-router-dom";
 
 
 function Card(props: { title?: any, text?: any, children?: any, size?: number }) {
@@ -54,6 +54,22 @@ function NewHome() {
 					<a href="https://www.linkedin.com/in/dorian-koch-847851279" className="mx-2" title="LinkedIn">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faLinkedin} />
 					</a>
+					<button
+						type="button"
+						className="btn btn-link p-0 mx-2"
+						title="Curriculum Vitae"
+						onClick={() => window.open("https://raw.githubusercontent.com/dorian-K/cv/main/cv_english.pdf", "_blank")}
+					>
+						<FontAwesomeIcon className="whiteicon bigfont" icon={faGraduationCap} />
+					</button>
+					<button
+						type="button"
+						className="btn btn-link p-0 mx-2"
+						title="Projects"
+						onClick={() => navigate("/projects")}
+					>
+						<FontAwesomeIcon className="whiteicon bigfont" icon={faFolderOpen} />
+					</button>
 				</div>
 				<div className="d-flex flex-column align-items-center mt-3 w-100">
 					<Card title="RWTH Gym Tracker" >
@@ -72,8 +88,8 @@ function NewHome() {
 								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
 							</a>
 						</div>
-						My team won the 48h Game Jam 2026 contest, hosted by the student council I/1 at RWTH Aachen University.
-						Click "Open" to play our game in your browser.
+						I was part of the winning team for the 48h Game Jam 2026 contest, hosted by the student council I/1 at RWTH Aachen University.
+						Click "Open" to play the game in your browser.
 					</Card>
 					<h2 className="text-white mt-3">Other stuff</h2>
 					<Card title="Visualizations I made">
@@ -119,6 +135,15 @@ function NewHome() {
 						</div>
 						Train a neural network to follow a red circle using a <b>Genetic Algorithm</b>.
 						The <b>WASM</b> version uses WebAssembly.
+					</Card>
+					<Card title="GitHub Projects">
+						<div>
+							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => { navigate("/projects") }}>
+								View Projects
+								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
+							</button>
+						</div>
+						Browse my public GitHub repositories, sorted by stars. Includes descriptions, languages, and metrics.
 					</Card>
 				</div>
 			</div>

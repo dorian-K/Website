@@ -5,9 +5,75 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #000;
+  color: #fff;
+  line-height: 1.6;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Global card styling */
+.card {
+  --bs-card-bg: rgba(30, 30, 30, 0.95);
+  --bs-card-color: #fff;
+  border: 1px solid #333;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.card-title {
+  color: #fff;
+}
+
+.card-text {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Ensure links are visible */
+a {
+  color: #4dabf7;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #74c0fc;
+  text-decoration: underline;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-outline-light {
+  color: #f8f9fa;
+  border-color: #f8f9fa;
+}
+
+/* Container max-width for better readability */
+.container {
+  max-width: 800px;
+}
+
+
+
+/* CV page iframe */
+.cv-iframe,
+.cv-iframe-loading {
+    height: 800px;
+}
+
+@media (max-width: 768px) {
+    .cv-iframe,
+    .cv-iframe-loading {
+        height: 500px;
+    }
 }

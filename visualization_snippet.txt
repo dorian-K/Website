@@ -1,0 +1,14 @@
+    <div className="card-body">
+        <h5 className="card-title text-white">Visualizations</h5>
+        <p className="card-text text-white-50">
+            I create interactive visualizations and simulations that help explain complex systems.
+            You can explore them in the <a href="/sims" className="text-info">simulations section</a>.
+        </p>
+        <iframe
+            src="/sims/graph"
+            title="Graph Visualization"
+            width="100%"
+            height="500px"
+            style={{ border: "none" }}
+        />
+    </div>
