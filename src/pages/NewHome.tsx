@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
-import { faRadio, faRightToBracket, faWaveSquare, faFilePdf, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
+import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
@@ -60,7 +60,7 @@ function NewHome() {
 						title="Curriculum Vitae"
 						onClick={() => navigate("/cv")}
 					>
-						<FontAwesomeIcon className="whiteicon bigfont" icon={faFilePdf} />
+						<FontAwesomeIcon className="whiteicon bigfont" icon={faGraduationCap} />
 					</button>
 					<button
 						type="button"
