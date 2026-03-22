@@ -58,7 +58,7 @@ function NewHome() {
 						type="button"
 						className="btn btn-link p-0 mx-2"
 						title="Curriculum Vitae"
-						onClick={() => navigate("/cv")}
+						onClick={() => window.open("https://raw.githubusercontent.com/dorian-K/cv/main/cv_english.pdf", "_blank")}
 					>
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGraduationCap} />
 					</button>
