@@ -172,6 +172,54 @@
 	background: transparent;
 }
 
+.gym-apex-chart {
+	padding-top: 0.25rem;
+	min-height: 320px;
+}
+
+.gym-apex-chart .apexcharts-canvas,
+.gym-apex-chart .apexcharts-svg {
+	background: transparent !important;
+}
+
+.gym-apex-chart .apexcharts-tooltip {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+}
+
+.gym-apex-chart .apexcharts-xaxistooltip,
+.gym-apex-chart .apexcharts-yaxistooltip {
+	display: none;
+}
+
+.gym-apex-tooltip {
+	padding: 0.75rem 0.85rem;
+	border-radius: 10px;
+	background: #0f141b;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+	min-width: 180px;
+}
+
+.gym-apex-tooltip-date {
+	font-size: 0.78rem;
+	color: rgba(255, 255, 255, 0.55);
+	margin-bottom: 0.2rem;
+}
+
+.gym-apex-tooltip-value {
+	font-size: 1rem;
+	font-weight: 600;
+	color: #f3f4f6;
+	margin-bottom: 0.2rem;
+}
+
+.gym-apex-tooltip-title {
+	font-size: 0.82rem;
+	color: rgba(255, 255, 255, 0.75);
+}
+
 .gym-chart svg {
 	width: 100%;
 	height: 100%;

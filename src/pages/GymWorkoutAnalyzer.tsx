@@ -1,5 +1,7 @@
 import React, { ChangeEvent, DragEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import Chart from "react-apexcharts";
+import type { ApexOptions } from "apexcharts";
 import "./GymWorkoutAnalyzer.scss";
 
 type WorkoutSet = {
@@ -186,9 +188,36 @@ const parseSetLine = (
 	};
 };
 
-const estimateOneRm = (weightKg: number | null, reps: number | null) => {
-	if (weightKg === null || reps === null || weightKg <= 0 || reps <= 0) return 0;
-	return weightKg * (1 + reps / 30);
+/**
+ * Estimates the 1 Rep Max (1RM) using a continuous piecewise combination
+ * of the sports science gold-standard formulas.
+ */
+const estimateOneRm = (weightKg: number | null, reps: number | null): number | null => {
+  // 1. Validate inputs (handle null, zero, or negative values)
+  if (weightKg === null || reps === null || weightKg <= 0 || reps <= 0) {
+    return null;
+  }
+
+  // 2. Base case: If they only did 1 rep, that IS their 1RM.
+  if (reps === 1) {
+    return weightKg;
+  }
+
+  let oneRepMax = 0;
+
+  // 3. The Brzycki-Epley Piecewise Strategy
+  if (reps <= 10) {
+    // Brzycki Formula: Best for <= 10 reps.
+    // Creates a highly accurate curve for heavy, low-rep sets.
+    oneRepMax = weightKg * (36 / (37 - reps));
+  } else {
+    // Epley Formula: Best for > 10 reps.
+    // Grows smoothly and linearly, avoiding Brzycki's exponential explosion
+    // while accurately aligning with the NSCA 60% load chart at 20 reps.
+    oneRepMax = weightKg * (1 + reps / 30);
+  }
+
+  return oneRepMax;
 };
 
 const parseWorkoutCsv = (text: string): ParsedData => {
@@ -300,40 +329,96 @@ function LineChart(props: { data: ExerciseProgressPoint[]; title: string; unit: 
 		return <div className="gym-empty-state">No chart data available yet.</div>;
 	}
 
-	const width = 760;
-	const height = 260;
-	const paddingX = 42;
-	const paddingY = 24;
-	const maxValue = Math.max(...data.map((item) => item.value), 1);
-	const stepX = data.length === 1 ? 0 : (width - paddingX * 2) / (data.length - 1);
-	const points = data.map((item, index) => {
-		const x = paddingX + index * stepX;
-		const y = height - paddingY - (item.value / maxValue) * (height - paddingY * 2);
-		return { ...item, x, y };
-	});
-	const path = points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x},${point.y}`).join(" ");
+	const series = [{
+		name: unit,
+		data: data.map((point) => ({
+			x: point.dateMs,
+			y: Number(point.value.toFixed(2)),
+			meta: point,
+		})),
+	}];
+
+	const seriesData = series[0].data as Array<{ x: number; y: number; meta: ExerciseProgressPoint }>;
+
+	const options: ApexOptions = {
+		chart: {
+			type: "line",
+			toolbar: { show: false },
+			zoom: { enabled: true },
+			background: "transparent",
+			foreColor: "rgba(255,255,255,0.7)",
+		},
+		stroke: {
+			curve: "smooth",
+			width: 3,
+		},
+		colors: ["#8cc8ff"],
+		markers: {
+			size: 4,
+			strokeWidth: 0,
+			hover: { sizeOffset: 2 },
+		},
+		grid: {
+			borderColor: "rgba(255,255,255,0.08)",
+			strokeDashArray: 4,
+			padding: {
+				left: 10,
+				right: 16,
+			},
+		},
+		xaxis: {
+			type: "datetime",
+			labels: {
+				datetimeUTC: false,
+				style: {
+					colors: "rgba(255,255,255,0.55)",
+				},
+			},
+			axisBorder: { color: "rgba(255,255,255,0.1)" },
+			axisTicks: { color: "rgba(255,255,255,0.1)" },
+		},
+		yaxis: {
+			labels: {
+				formatter: (value) => `${formatNumber(value, 1)} ${unit}`,
+				style: {
+					colors: ["rgba(255,255,255,0.55)"],
+				},
+			},
+		},
+		tooltip: {
+			theme: "dark",
+			x: {
+				formatter: (_value, context) => {
+					const point = context ? seriesData[context.dataPointIndex] : undefined;
+					return point?.meta?.dateLabel ?? "";
+				},
+			},
+			y: {
+				formatter: (value) => `${formatNumber(value, 1)} ${unit}`,
+				title: { formatter: () => "" },
+			},
+			custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+				const point = w.config.series?.[seriesIndex]?.data?.[dataPointIndex] as { meta?: ExerciseProgressPoint } | undefined;
+				const meta = point?.meta;
+				if (!meta) return "";
+				return `
+					<div class="gym-apex-tooltip">
+						<div class="gym-apex-tooltip-date">${meta.dateLabel}</div>
+						<div class="gym-apex-tooltip-value">${formatNumber(series[seriesIndex][dataPointIndex], 1)} ${unit}</div>
+						<div class="gym-apex-tooltip-title">${meta.workoutTitle}</div>
+					</div>
+				`;
+			},
+		},
+		legend: { show: false },
+		dataLabels: { enabled: false },
+	};
 
 	return (
 		<div>
 			<h3 className="gym-panel-title">{title}</h3>
-			<div className="gym-chart gym-chart-minimal">
-				<svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={title}>
-					<line className="gym-chart-axis" x1={paddingX} y1={height - paddingY} x2={width - paddingX} y2={height - paddingY} />
-					<line className="gym-chart-axis" x1={paddingX} y1={paddingY} x2={paddingX} y2={height - paddingY} />
-					<path className="gym-chart-line" d={path} />
-					{points.map((point, index) => (
-						<g key={`${point.workoutTitle}-${point.dateMs}-${index}`}>
-							<circle className="gym-chart-point" cx={point.x} cy={point.y} r="4" />
-							{index % Math.max(1, Math.ceil(points.length / 6)) === 0 || index === points.length - 1 ? (
-								<text className="gym-chart-label" x={point.x} y={height - 8} textAnchor="middle">
-									{point.label}
-								</text>
-							) : null}
-							<title>{`${point.dateLabel} · ${formatNumber(point.value, 1)} ${unit} · ${point.workoutTitle}`}</title>
-						</g>
-					))}
-					<text className="gym-chart-label" x={paddingX} y={14}>{`${formatNumber(maxValue, 1)} ${unit}`}</text>
-				</svg>
+			<div className="gym-chart gym-apex-chart">
+				<Chart options={options} series={series} type="line" height={320} />
 			</div>
 		</div>
 	);
