@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
-import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
+import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faFolderOpen, faDumbbell } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
@@ -80,6 +80,15 @@ function NewHome() {
 							</a>
 						</div>
 						View the utilization of the RWTH Aachen University gym over time and compare it with past data.
+					</Card>
+					<Card title="Gym Workout CSV Analyzer" >
+						<div>
+							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => navigate("/gym-analysis")}>
+								Open
+								<FontAwesomeIcon className="whiteicon mx-1" icon={faDumbbell} />
+							</button>
+						</div>
+						Drop in a local CSV export of your workouts and get instant in-browser analysis of sets, reps, duration, volume, and exercise trends.
 					</Card>
 					<Card title="Game Jam 2026" >
 						<div>
