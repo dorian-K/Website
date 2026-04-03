@@ -192,10 +192,10 @@ const parseSetLine = (
  * Estimates the 1 Rep Max (1RM) using a continuous piecewise combination
  * of the sports science gold-standard formulas.
  */
-const estimateOneRm = (weightKg: number | null, reps: number | null): number | null => {
+const estimateOneRm = (weightKg: number | null, reps: number | null): number => {
   // 1. Validate inputs (handle null, zero, or negative values)
   if (weightKg === null || reps === null || weightKg <= 0 || reps <= 0) {
-    return null;
+    return 0;
   }
 
   // 2. Base case: If they only did 1 rep, that IS their 1RM.
