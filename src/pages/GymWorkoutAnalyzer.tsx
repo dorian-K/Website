@@ -591,7 +591,7 @@ function GymWorkoutAnalyzer() {
 			<div className="container">
 				<header className="gym-toolbar">
 					<div>
-						<h1 className="gym-page-title">Gym workout analysis</h1>
+						<h1 className="gym-page-title">AlphaProgression Gym workout analysis</h1>
 						<p className="gym-analyzer-muted mb-0">Local CSV parsing, progression tracking, and workout summaries.</p>
 					</div>
 					<Link className="gym-back-link" to="/">Back</Link>

@@ -8,7 +8,7 @@ import { sketch2 } from "../sket";
 
 
 function Card(props: { title?: any, text?: any, children?: any, size?: number }) {
-	return (<div className={"col-md-" + (props.size ?? 6) + " my-1"}>
+	return (<div className={"col-md-" + (props.size ?? 8) + " my-1"}>
 		<div className="card mx-1">
 			<div className="card-body text-start">
 				<h5 className="card-title">
@@ -43,6 +43,10 @@ function NewHome() {
 		}
 	}, [makeTextTransparent])
 
+	const openCV = () => {
+		window.open("https://raw.githubusercontent.com/dorian-K/cv/main/cv_english.pdf", "_blank");
+	};
+
 	return (
 		<div id="text" style={{ display: "auto" }} className={makeTextTransparent ? "overflow-hidden" : ""}>
 			<p className="portnametext text-white" >Dorian Koch</p>
@@ -58,7 +62,7 @@ function NewHome() {
 						type="button"
 						className="btn btn-link p-0 mx-2"
 						title="Curriculum Vitae"
-						onClick={() => window.open("https://raw.githubusercontent.com/dorian-K/cv/main/cv_english.pdf", "_blank")}
+						onClick={openCV}
 					>
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGraduationCap} />
 					</button>
@@ -72,6 +76,16 @@ function NewHome() {
 					</button>
 				</div>
 				<div className="d-flex flex-column align-items-center mt-3 w-100">
+					<Card title="Curriculum Vitae" >
+						<div>
+							<button type="button" className="btn btn-primary mb-2 me-2" onClick={openCV}>
+								Open CV
+								<FontAwesomeIcon className="whiteicon mx-1" icon={faGraduationCap} />
+							</button>
+						</div>
+						View my curriculum vitae, including education, work experience, skills, and projects.
+						Click "Open CV" to view the PDF in a new tab.
+					</Card>
 					<Card title="RWTH Gym Tracker" >
 						<div>
 							<a className="btn btn-primary mb-2 me-2" href="https://rwtf.dorianko.ch/">
@@ -80,15 +94,6 @@ function NewHome() {
 							</a>
 						</div>
 						View the utilization of the RWTH Aachen University gym over time and compare it with past data.
-					</Card>
-					<Card title="Gym Workout CSV Analyzer" >
-						<div>
-							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => navigate("/gym-analysis")}>
-								Open
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faDumbbell} />
-							</button>
-						</div>
-						Drop in a local CSV export of your workouts and get instant in-browser analysis of sets, reps, duration, volume, and exercise trends.
 					</Card>
 					<Card title="Game Jam 2026" >
 						<div>
@@ -101,6 +106,15 @@ function NewHome() {
 						Click "Open" to play the game in your browser.
 					</Card>
 					<h2 className="text-white mt-3">Other stuff</h2>
+					<Card title="AlphaProgression Gym Workout CSV Analyzer" >
+						<div>
+							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => navigate("/gym-analysis")}>
+								Open
+								<FontAwesomeIcon className="whiteicon mx-1" icon={faDumbbell} />
+							</button>
+						</div>
+						Drop in a CSV export of your AlphaProgression workouts and get in-browser analysis of sets, reps, duration, volume, and exercise trends.
+					</Card>
 					<Card title="Visualizations I made">
 						<div>
 							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => { navigate("/sims/planets") }}>
