@@ -1,0 +1,117 @@
+.arith-page {
+	min-height: 100vh;
+	padding: 2rem 1rem 3rem;
+	background: #0a0d12;
+	color: #f3f4f6;
+}
+
+.arith-container {
+	max-width: 760px;
+	margin: 0 auto;
+}
+
+.arith-title {
+	margin-bottom: 0.75rem;
+	font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.arith-intro {
+	color: rgba(255, 255, 255, 0.7);
+	margin-bottom: 1.5rem;
+}
+
+.arith-op {
+	margin-bottom: 1rem;
+}
+
+.arith-op-label {
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.arith-op-detail {
+	margin: 0.35rem 0 0 1.6rem;
+	color: rgba(255, 255, 255, 0.75);
+}
+
+.arith-range {
+	white-space: nowrap;
+}
+
+.arith-range-input {
+	display: inline-block;
+	width: 4.5rem;
+	text-align: center;
+	vertical-align: baseline;
+}
+
+.arith-duration {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin: 1.5rem 0;
+
+	.form-select {
+		width: auto;
+	}
+}
+
+.arith-errors {
+	color: #f87171;
+	padding-left: 1.2rem;
+}
+
+.arith-banner {
+	display: flex;
+	justify-content: space-between;
+	padding: 0.6rem 1rem;
+	border-radius: 0.4rem;
+	background: rgba(255, 255, 255, 0.08);
+	font-variant-numeric: tabular-nums;
+	font-size: 1.1rem;
+}
+
+.arith-problem {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	padding: 4rem 0;
+	font-size: clamp(1.8rem, 6vw, 2.8rem);
+	font-variant-numeric: tabular-nums;
+}
+
+.arith-answer {
+	width: 5.5em;
+	padding: 0.1em 0.3em;
+	border: 2px solid rgba(255, 255, 255, 0.35);
+	border-radius: 0.3rem;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: center;
+	outline: none;
+
+	&:focus {
+		border-color: #60a5fa;
+	}
+}
+
+.arith-results {
+	padding: 3rem 0;
+	text-align: center;
+}
+
+.arith-final-score {
+	font-size: clamp(2rem, 6vw, 3rem);
+	font-weight: 600;
+	margin-bottom: 1.5rem;
+}
+
+.arith-results-actions {
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}

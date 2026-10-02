@@ -11,6 +11,7 @@ import WasmGeneticSim from "../experiments/genetics_rust/js/WasmGeneticSim";
 import CvPage from "./CvPage";
 import ProjectsPage from "./ProjectsPage";
 import GymWorkoutAnalyzer from "./GymWorkoutAnalyzer";
+import ArithmeticGame from "./ArithmeticGame";
 
 const Sims = React.lazy(() => import("./Sims"));
 
@@ -28,6 +29,7 @@ function App() {
 					<Route path="/cv" element={<Strict><CvPage /></Strict>} />
 					<Route path="/projects" element={<Strict><ProjectsPage /></Strict>} />
 					<Route path="/gym-analysis" element={<Strict><GymWorkoutAnalyzer /></Strict>} />
+					<Route path="/arithmetic" element={<Strict><ArithmeticGame /></Strict>} />
 
 					<Route path="/sims/*" element={<Strict><React.Suspense fallback={<div>Loading...</div>}><Sims /></React.Suspense></Strict>} />
 				</Routes>
