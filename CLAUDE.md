@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Personal website (https://dorianko.ch): a React 18 + TypeScript single-page app built with Vite, plus a Rust→WebAssembly simulation under `src/experiments/genetics_rust/wasm`.
+Personal website (https://dorianko.ch): a React 19 + TypeScript 7 single-page app built with Vite, plus a Rust→WebAssembly simulation under `src/experiments/genetics_rust/wasm`.
 
 ## Commands
 

@@ -5,14 +5,14 @@ import { OperationType } from "../wasm/pkg/wasm";
 import * as Comlink from 'comlink';
 import { HandlerRet } from "./GeneticWebWorker";
 
-const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.ReactP5Wrapper})));
+const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.P5Canvas})));
 
 type MyProps = SketchProps & {
 	showRand: boolean,
 	showMut: boolean,
 }
 
-function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject<HandlerRet | undefined>) {
+function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.RefObject<HandlerRet | undefined>) {
 	p.disableFriendlyErrors = true;
 
 	// let firstFrame = 0;
@@ -59,10 +59,6 @@ function drawFunc(p: P5CanvasInstance<MyProps>, handlers: React.MutableRefObject
 		showRandom = props.showRand === true;
 		showMut = props.showMut === true;
 	};
-
-	p.preload = () => {
-		//myFont = p.loadFont("Roboto-Regular.ttf");
-	}
 
 	p.setup = () => {
 		bounds = {
@@ -216,7 +212,7 @@ export default function WasmGeneticSim() {
 	const [showRandom, setShowRandom] = useState(true);
 	const [showMut, setShowMut] = useState(true);
 	const [shouldMount, setShouldMount] = useState(false);
-	const handlers = useRef<HandlerRet>();
+	const handlers = useRef<HandlerRet | undefined>(undefined);
 	const [sketchFunc, _] = useState([(p5: any) => { drawFunc(p5, handlers) }]);
 
 	const onKeyDown = (ev: KeyboardEvent) => {

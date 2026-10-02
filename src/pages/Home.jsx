@@ -7,7 +7,7 @@ import "./Home.css";
 import { makeSketch } from "../sket";
 import React from "react";
 
-const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({ default: obj.ReactP5Wrapper })));
+const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({ default: obj.P5Canvas })));
 
 function BgComponent(props) {
 

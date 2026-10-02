@@ -5,7 +5,7 @@ import LivingNode from "./logic/LivingNode";
 import { useState } from "react";
 import React, { useEffect } from "react";
 
-const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.ReactP5Wrapper})));
+const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({default: obj.P5Canvas})));
 
 type MyProps = SketchProps & {
 	showRand?: boolean,

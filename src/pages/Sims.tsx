@@ -4,7 +4,7 @@ import { sketch2, makeSketch } from "../sket";
 import { Link, Route, Routes } from "react-router-dom";
 import { Sketch } from "@p5-wrapper/react";
 
-const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({ default: obj.ReactP5Wrapper })));
+const LazyP5Wrapper = React.lazy(() => import("@p5-wrapper/react").then(obj => ({ default: obj.P5Canvas })));
 
 function BgComponent(props: { expression?: any, showVelocity?: boolean, numBodies: number, showCenter?: boolean }) {
 	return (
