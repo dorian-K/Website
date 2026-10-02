@@ -397,8 +397,8 @@ function LineChart(props: { data: ExerciseProgressPoint[]; title: string; unit: 
 				formatter: (value) => `${formatNumber(value, 1)} ${unit}`,
 				title: { formatter: () => "" },
 			},
-			custom: ({ series, seriesIndex, dataPointIndex, w }) => {
-				const point = w.config.series?.[seriesIndex]?.data?.[dataPointIndex] as { meta?: ExerciseProgressPoint } | undefined;
+			custom: ({ series, seriesIndex, dataPointIndex }) => {
+				const point = seriesData[dataPointIndex] as { meta?: ExerciseProgressPoint } | undefined;
 				const meta = point?.meta;
 				if (!meta) return "";
 				return `
