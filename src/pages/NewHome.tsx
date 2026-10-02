@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
-import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faFolderOpen, faDumbbell } from "@fortawesome/free-solid-svg-icons";
+import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faFolderOpen, faDumbbell, faCalculator } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
@@ -114,6 +114,15 @@ function NewHome() {
 							</button>
 						</div>
 						Drop in a CSV export of your AlphaProgression workouts and get in-browser analysis of sets, reps, duration, volume, and exercise trends.
+					</Card>
+					<Card title="Arithmetic Speed Drill" >
+						<div>
+							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => navigate("/arithmetic")}>
+								Play
+								<FontAwesomeIcon className="whiteicon mx-1" icon={faCalculator} />
+							</button>
+						</div>
+						A copy of the Zetamac arithmetic game, with additional stats for learning.
 					</Card>
 					<Card title="Visualizations I made">
 						<div>
