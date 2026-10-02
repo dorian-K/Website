@@ -114,3 +114,11 @@ export function generateProblem(settings: GameSettings, rng: () => number = Math
 export function isCorrectAnswer(input: string, problem: Problem): boolean {
 	return input.trim() === String(problem.answer);
 }
+
+/** Whether any enabled operation can produce a negative answer (only with negative ranges). */
+export function answersCanBeNegative(settings: GameSettings): boolean {
+	const { operations: ops } = settings;
+	const addNegative = (ops.add || ops.sub) && (settings.addLeft.min < 0 || settings.addRight.min < 0);
+	const mulNegative = (ops.mul || ops.div) && (settings.mulLeft.min < 0 || settings.mulRight.min < 0);
+	return addNegative || mulNegative;
+}

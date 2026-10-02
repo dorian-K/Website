@@ -8,6 +8,7 @@ import {
 	NumberRange,
 	Operation,
 	Problem,
+	answersCanBeNegative,
 	isCorrectAnswer,
 	validateSettings,
 } from "../experiments/arithmetic/problems";
@@ -17,6 +18,13 @@ import { RunRecord, loadRuns } from "../experiments/arithmetic/runStore";
 import "./ArithmeticGame.scss";
 
 const SETTINGS_STORAGE_KEY = "arithmetic-game-settings";
+const THEME_STORAGE_KEY = "arithmetic-game-theme";
+
+type Theme = "dark" | "classic";
+const THEMES: { value: Theme; label: string }[] = [
+	{ value: "dark", label: "Dark" },
+	{ value: "classic", label: "Classic (zetamac-style)" },
+];
 
 type RangeKey = "addLeft" | "addRight" | "mulLeft" | "mulRight";
 type RangeDraft = { min: string; max: string };
@@ -76,6 +84,26 @@ const saveSettings = (settings: GameSettings) => {
 	}
 };
 
+// The theme is kept apart from GameSettings so switching it doesn't split up the
+// "same settings" history used for stats.
+const loadTheme = (): Theme => {
+	try {
+		const stored = localStorage.getItem(THEME_STORAGE_KEY);
+		if (THEMES.some((theme) => theme.value === stored)) return stored as Theme;
+	} catch {
+		// Storage unavailable; fall back to the default.
+	}
+	return "dark";
+};
+
+const saveTheme = (theme: Theme) => {
+	try {
+		localStorage.setItem(THEME_STORAGE_KEY, theme);
+	} catch {
+		// Ignore: remembering the theme is only a convenience.
+	}
+};
+
 function RangeInputs(props: {
 	draft: SettingsDraft;
 	rangeKey: RangeKey;
@@ -101,7 +129,12 @@ function RangeInputs(props: {
 	);
 }
 
-function SettingsScreen(props: { initial: GameSettings; onStart: (settings: GameSettings) => void }) {
+function SettingsScreen(props: {
+	initial: GameSettings;
+	onStart: (settings: GameSettings) => void;
+	theme: Theme;
+	onThemeChange: (theme: Theme) => void;
+}) {
 	const [draft, setDraft] = useState<SettingsDraft>(() => toDraft(props.initial));
 	const [errors, setErrors] = useState<string[]>([]);
 
@@ -174,7 +207,7 @@ function SettingsScreen(props: { initial: GameSettings; onStart: (settings: Game
 					<div className="arith-op-detail">Multiplication problems in reverse.</div>
 				</div>
 
-				<div className="arith-duration">
+				<div className="arith-select-row">
 					<label htmlFor="arith-duration">Duration:</label>
 					<select
 						id="arith-duration"
@@ -185,6 +218,22 @@ function SettingsScreen(props: { initial: GameSettings; onStart: (settings: Game
 						{DURATION_OPTIONS.map((seconds) => (
 							<option key={seconds} value={seconds}>
 								{seconds} seconds
+							</option>
+						))}
+					</select>
+				</div>
+
+				<div className="arith-select-row">
+					<label htmlFor="arith-theme">Theme:</label>
+					<select
+						id="arith-theme"
+						className="form-select form-select-sm"
+						value={props.theme}
+						onChange={(e) => props.onThemeChange(e.target.value as Theme)}
+					>
+						{THEMES.map((theme) => (
+							<option key={theme.value} value={theme.value}>
+								{theme.label}
 							</option>
 						))}
 					</select>
@@ -213,7 +262,7 @@ function formatSeconds(ms: number | null): string {
 function StatsTable(props: { stats: OperationStats[] }) {
 	return (
 		<div className="table-responsive">
-			<table className="table table-dark table-sm arith-stats-table">
+			<table className="table table-sm arith-stats-table">
 				<thead>
 					<tr>
 						<th>Operation</th>
@@ -247,23 +296,30 @@ function StatsTable(props: { stats: OperationStats[] }) {
 	);
 }
 
-function ScoreChart(props: { runs: RunRecord[]; currentRunId: string }) {
-	const { runs, currentRunId } = props;
+const CHART_COLORS: Record<Theme, { line: string; current: string; grid: string }> = {
+	dark: { line: "#60a5fa", current: "#f59e0b", grid: "rgba(255, 255, 255, 0.1)" },
+	classic: { line: "#1d4ed8", current: "#d97706", grid: "#e5e5e5" },
+};
+
+function ScoreChart(props: { runs: RunRecord[]; currentRunId: string; theme: Theme }) {
+	const { runs, currentRunId, theme } = props;
+	const colors = CHART_COLORS[theme];
+	const mode = theme === "dark" ? "dark" : "light";
 	// Plotted by game number rather than wall-clock time: games come in bursts minutes apart
 	// with days in between, which a time axis would squash together.
 	const data = runs.map((run, i) => ({
 		x: i + 1,
 		y: run.score,
-		fillColor: run.id === currentRunId ? "#f59e0b" : "#60a5fa",
+		fillColor: run.id === currentRunId ? colors.current : colors.line,
 	}));
 	const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
 	const options: ApexOptions = {
 		chart: { type: "line", background: "transparent", toolbar: { show: false }, zoom: { enabled: false } },
-		theme: { mode: "dark" },
-		colors: ["#60a5fa"],
+		theme: { mode },
+		colors: [colors.line],
 		stroke: { width: 2, curve: "straight" },
 		markers: { size: 5, strokeWidth: 0 },
-		grid: { borderColor: "rgba(255, 255, 255, 0.1)" },
+		grid: { borderColor: colors.grid },
 		xaxis: {
 			type: "numeric",
 			min: 1,
@@ -274,7 +330,7 @@ function ScoreChart(props: { runs: RunRecord[]; currentRunId: string }) {
 		},
 		yaxis: { min: 0, forceNiceScale: true, labels: { formatter: (value) => String(Math.round(value)) } },
 		tooltip: {
-			theme: "dark",
+			theme: mode,
 			x: {
 				formatter: (value) => {
 					const game = Math.round(Number(value));
@@ -286,11 +342,12 @@ function ScoreChart(props: { runs: RunRecord[]; currentRunId: string }) {
 		legend: { show: false },
 		dataLabels: { enabled: false },
 	};
-	return <Chart options={options} series={[{ name: "Score", data }]} type="line" height={280} />;
+	// key: ApexCharts doesn't fully restyle on a theme change, so remount instead.
+	return <Chart key={theme} options={options} series={[{ name: "Score", data }]} type="line" height={280} />;
 }
 
-function RunResults(props: { run: RunRecord }) {
-	const { run } = props;
+function RunResults(props: { run: RunRecord; theme: Theme }) {
+	const { run, theme } = props;
 	const [history, setHistory] = useState<RunRecord[] | null>(null);
 	const [loadError, setLoadError] = useState(false);
 
@@ -339,7 +396,7 @@ function RunResults(props: { run: RunRecord }) {
 						<p className="arith-stats-note">
 							All {comparable.length} {comparable.length === 1 ? "game" : "games"} with these settings; this game is highlighted.
 						</p>
-						<ScoreChart runs={comparable} currentRunId={run.id} />
+						<ScoreChart runs={comparable} currentRunId={run.id} theme={theme} />
 					</>
 				)}
 			</section>
@@ -347,19 +404,67 @@ function RunResults(props: { run: RunRecord }) {
 	);
 }
 
+/** True on touch-first devices (phones, tablets), tracking changes such as a docked tablet. */
+function useCoarsePointer(): boolean {
+	const query = "(pointer: coarse)";
+	const [matches, setMatches] = useState(() => window.matchMedia?.(query).matches ?? false);
+	useEffect(() => {
+		const media = window.matchMedia?.(query);
+		if (!media) return;
+		const onChange = () => setMatches(media.matches);
+		media.addEventListener("change", onChange);
+		return () => media.removeEventListener("change", onChange);
+	}, []);
+	return matches;
+}
+
+type KeypadKey = { label: string; ariaLabel: string; action: "digit" | "minus" | "clear" | "backspace"; digit?: string };
+
+const KEYPAD_KEYS: KeypadKey[] = [
+	..."123456789".split("").map((d): KeypadKey => ({ label: d, ariaLabel: d, action: "digit", digit: d })),
+	{ label: "CE", ariaLabel: "Clear", action: "clear" },
+	{ label: "0", ariaLabel: "0", action: "digit", digit: "0" },
+	{ label: "⌫", ariaLabel: "Backspace", action: "backspace" },
+];
+
+const MINUS_KEY: KeypadKey = { label: "−", ariaLabel: "Minus", action: "minus" };
+
+function Keypad(props: { showMinus: boolean; onKey: (key: KeypadKey) => void }) {
+	const keys = props.showMinus ? [...KEYPAD_KEYS, MINUS_KEY] : KEYPAD_KEYS;
+	return (
+		<div className="arith-keypad" role="group" aria-label="Keypad">
+			{keys.map((key) => (
+				<button
+					key={key.ariaLabel}
+					type="button"
+					className={`arith-key arith-key-${key.action}`}
+					aria-label={key.ariaLabel}
+					// Keep focus (and the caret) in the answer box instead of moving it to the button.
+					onPointerDown={(e) => e.preventDefault()}
+					onClick={() => props.onKey(key)}
+				>
+					{key.label}
+				</button>
+			))}
+		</div>
+	);
+}
+
 function GameScreen(props: {
 	recorder: RunRecorder;
+	theme: Theme;
 	finished: boolean;
 	onFinish: () => void;
 	onRestart: () => void;
 	onChangeSettings: () => void;
 }) {
-	const { recorder, finished, onFinish, onRestart, onChangeSettings } = props;
+	const { recorder, theme, finished, onFinish, onRestart, onChangeSettings } = props;
 	const [problem, setProblem] = useState<Problem>(() => recorder.currentProblem);
 	const [input, setInput] = useState("");
 	const [score, setScore] = useState(0);
 	const [secondsLeft, setSecondsLeft] = useState(recorder.run.settings.durationSeconds);
 	const inputRef = useRef<HTMLInputElement>(null);
+	const showKeypad = useCoarsePointer();
 
 	useEffect(() => {
 		if (finished) return;
@@ -395,16 +500,34 @@ function GameScreen(props: {
 		};
 	}, [recorder]);
 
-	const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const applyInput = (value: string, inputType: string) => {
 		if (finished) return;
-		const value = event.target.value;
-		recorder.recordInput(value, (event.nativeEvent as InputEvent).inputType ?? "unknown");
+		recorder.recordInput(value, inputType);
 		if (isCorrectAnswer(value, problem)) {
 			setProblem(recorder.solveCurrent());
 			setScore(recorder.run.score);
 			setInput("");
 		} else {
 			setInput(value);
+		}
+	};
+
+	// Keypad input types mirror InputEvent naming, so "delete…" counts as a correction in the stats.
+	const handleKeypad = (key: KeypadKey) => {
+		recorder.recordKey(`keypad:${key.ariaLabel}`, false);
+		switch (key.action) {
+			case "digit":
+				applyInput(input + key.digit, "insertKeypadDigit");
+				break;
+			case "minus":
+				if (!input.startsWith("-")) applyInput("-" + input, "insertKeypadMinus");
+				break;
+			case "backspace":
+				if (input !== "") applyInput(input.slice(0, -1), "deleteKeypadBackspace");
+				break;
+			case "clear":
+				if (input !== "") applyInput("", "deleteKeypadClear");
+				break;
 		}
 	};
 
@@ -422,31 +545,35 @@ function GameScreen(props: {
 						<button type="button" className="btn btn-primary" onClick={onRestart} autoFocus>
 							Try again
 						</button>
-						<button type="button" className="btn btn-outline-light" onClick={onChangeSettings}>
+						<button type="button" className="btn arith-btn-outline" onClick={onChangeSettings}>
 							Change settings
 						</button>
 					</div>
-					<RunResults run={recorder.run} />
+					<RunResults run={recorder.run} theme={theme} />
 				</div>
 			) : (
+				<>
 				<div className="arith-problem">
 					<span className="arith-problem-text">{problem.text} =</span>
 					<input
 						ref={inputRef}
 						type="text"
-						inputMode="numeric"
+						// With the on-screen keypad, keep the phone's keyboard from popping up over it.
+						inputMode={showKeypad ? "none" : "numeric"}
 						autoComplete="off"
 						autoCorrect="off"
 						spellCheck={false}
 						className="arith-answer"
 						aria-label="Answer"
 						value={input}
-						onChange={handleInput}
+						onChange={(e) => applyInput(e.target.value, (e.nativeEvent as InputEvent).inputType ?? "unknown")}
 						onKeyDown={(e) => recorder.recordKey(e.key, e.repeat)}
 						onFocus={() => recorder.recordEvent("answer-focus")}
 						onBlur={() => recorder.recordEvent("answer-blur")}
 					/>
 				</div>
+				{showKeypad && <Keypad showMinus={answersCanBeNegative(recorder.run.settings)} onKey={handleKeypad} />}
+				</>
 			)}
 		</div>
 	);
@@ -496,6 +623,12 @@ function ArithmeticGame() {
 	const [phase, setPhase] = useState<Phase>("settings");
 	const [settings, setSettings] = useState<GameSettings>(loadSettings);
 	const [recorder, setRecorder] = useState<RunRecorder | null>(null);
+	const [theme, setTheme] = useState<Theme>(loadTheme);
+
+	const changeTheme = (newTheme: Theme) => {
+		setTheme(newTheme);
+		saveTheme(newTheme);
+	};
 
 	useEffect(() => {
 		document.title = "Arithmetic Game";
@@ -511,17 +644,18 @@ function ArithmeticGame() {
 	const handleFinish = useCallback(() => setPhase("finished"), []);
 
 	return (
-		<div className="arith-page">
+		<div className={`arith-page arith-theme-${theme}`}>
 			<div className="arith-container">
 				{phase === "settings" || recorder === null ? (
 					<>
-						<SettingsScreen initial={settings} onStart={startGame} />
+						<SettingsScreen initial={settings} onStart={startGame} theme={theme} onThemeChange={changeTheme} />
 						<SavedRunsInfo />
 					</>
 				) : (
 					<GameScreen
 						key={recorder.run.id}
 						recorder={recorder}
+						theme={theme}
 						finished={phase === "finished"}
 						onFinish={handleFinish}
 						onRestart={() => startGame(settings)}
