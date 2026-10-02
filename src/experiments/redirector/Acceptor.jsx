@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import {QRCodeSVG} from "qrcode.react";
 import Measure from "react-measure";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
+import { ReadyState } from "react-use-websocket/dist/lib/constants";
 
 import "./Acceptor.css";
 
@@ -73,7 +74,6 @@ function QRGen() {
 									? "https://dorianko.ch/b?uid=" + myId
 									: " "
 							}
-							renderAs="svg"
 							size={Math.min(height, width)}
 							style={{ display: hasNumber ? "inherit" : "none" }}
 						/>

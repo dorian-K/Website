@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import "./Sender.css";
-import useWebSocket from "react-use-websocket";
+import { useWebSocket } from "react-use-websocket/dist/lib/use-websocket";
 
 function Sender() {
 
