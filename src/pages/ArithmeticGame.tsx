@@ -370,6 +370,8 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 	const comparable = history ? comparableRuns(history, run.settings) : [run];
 	const lastTen = comparable.slice(-10);
 	const lastTenScores = lastTen.map((r) => r.score);
+	const startOfToday = new Date().setHours(0, 0, 0, 0);
+	const todayScores = comparable.filter((r) => r.startedAt >= startOfToday).map((r) => r.score);
 
 	return (
 		<div className="arith-stats">
@@ -377,6 +379,18 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 				<h2>This game</h2>
 				<StatsTable stats={operationStats([run])} />
 			</section>
+
+			{todayScores.length > 0 && (
+				<section>
+					<h2>Today</h2>
+					<p className="arith-stats-note">
+						{todayScores.length} {todayScores.length === 1 ? "game" : "games"}: highest {Math.max(...todayScores)},
+						lowest {Math.min(...todayScores)}, average{" "}
+						{(todayScores.reduce((a, b) => a + b, 0) / todayScores.length).toFixed(1)}. Only games with the same
+						settings as this one are included.
+					</p>
+				</section>
+			)}
 
 			<section>
 				<h2>Last {lastTen.length} {lastTen.length === 1 ? "game" : "games"}</h2>
