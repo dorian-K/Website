@@ -1,4 +1,6 @@
 import React, { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import Chart from "react-apexcharts";
+import type { ApexOptions } from "apexcharts";
 import {
 	DEFAULT_SETTINGS,
 	DURATION_OPTIONS,
@@ -6,10 +8,12 @@ import {
 	NumberRange,
 	Operation,
 	Problem,
-	generateProblem,
 	isCorrectAnswer,
 	validateSettings,
 } from "../experiments/arithmetic/problems";
+import { RunRecorder } from "../experiments/arithmetic/runRecorder";
+import { OPERATION_LABELS, OperationStats, comparableRuns, operationStats } from "../experiments/arithmetic/runStats";
+import { RunRecord, loadRuns } from "../experiments/arithmetic/runStore";
 import "./ArithmeticGame.scss";
 
 const SETTINGS_STORAGE_KEY = "arithmetic-game-settings";
@@ -202,44 +206,202 @@ function SettingsScreen(props: { initial: GameSettings; onStart: (settings: Game
 	);
 }
 
+function formatSeconds(ms: number | null): string {
+	return ms === null ? "–" : `${(ms / 1000).toFixed(2)} s`;
+}
+
+function StatsTable(props: { stats: OperationStats[] }) {
+	return (
+		<div className="table-responsive">
+			<table className="table table-dark table-sm arith-stats-table">
+				<thead>
+					<tr>
+						<th>Operation</th>
+						<th>Solved</th>
+						<th>Average</th>
+						<th>Median</th>
+						<th>Fastest</th>
+						<th>Slowest</th>
+						<th title="Average time from the problem appearing to the first keystroke">First key</th>
+						<th title="Solved problems where something was deleted before the correct answer">Corrected</th>
+						<th>Total time</th>
+					</tr>
+				</thead>
+				<tbody>
+					{props.stats.map((row) => (
+						<tr key={row.operation} className={row.operation === "all" ? "arith-stats-total" : undefined}>
+							<td>{row.operation === "all" ? "All" : OPERATION_LABELS[row.operation]}</td>
+							<td>{row.solved}</td>
+							<td>{formatSeconds(row.meanMs)}</td>
+							<td>{formatSeconds(row.medianMs)}</td>
+							<td>{formatSeconds(row.fastestMs)}</td>
+							<td>{formatSeconds(row.slowestMs)}</td>
+							<td>{formatSeconds(row.meanFirstInputMs)}</td>
+							<td>{row.corrected}</td>
+							<td>{row.solved > 0 ? formatSeconds(row.totalMs) : "–"}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</div>
+	);
+}
+
+function ScoreChart(props: { runs: RunRecord[]; currentRunId: string }) {
+	const { runs, currentRunId } = props;
+	// Plotted by game number rather than wall-clock time: games come in bursts minutes apart
+	// with days in between, which a time axis would squash together.
+	const data = runs.map((run, i) => ({
+		x: i + 1,
+		y: run.score,
+		fillColor: run.id === currentRunId ? "#f59e0b" : "#60a5fa",
+	}));
+	const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
+	const options: ApexOptions = {
+		chart: { type: "line", background: "transparent", toolbar: { show: false }, zoom: { enabled: false } },
+		theme: { mode: "dark" },
+		colors: ["#60a5fa"],
+		stroke: { width: 2, curve: "straight" },
+		markers: { size: 5, strokeWidth: 0 },
+		grid: { borderColor: "rgba(255, 255, 255, 0.1)" },
+		xaxis: {
+			type: "numeric",
+			min: 1,
+			max: Math.max(2, runs.length),
+			tickAmount: Math.min(Math.max(1, runs.length - 1), 10),
+			title: { text: "Game" },
+			labels: { formatter: (value) => String(Math.round(Number(value))) },
+		},
+		yaxis: { min: 0, forceNiceScale: true, labels: { formatter: (value) => String(Math.round(value)) } },
+		tooltip: {
+			theme: "dark",
+			x: {
+				formatter: (value) => {
+					const game = Math.round(Number(value));
+					const run = runs[game - 1];
+					return run ? `Game ${game} · ${dateFormat.format(run.startedAt)}` : "";
+				},
+			},
+		},
+		legend: { show: false },
+		dataLabels: { enabled: false },
+	};
+	return <Chart options={options} series={[{ name: "Score", data }]} type="line" height={280} />;
+}
+
+function RunResults(props: { run: RunRecord }) {
+	const { run } = props;
+	const [history, setHistory] = useState<RunRecord[] | null>(null);
+	const [loadError, setLoadError] = useState(false);
+
+	useEffect(() => {
+		let cancelled = false;
+		loadRuns()
+			.then((runs) => {
+				// Use the in-memory copy of this run; the stored one may not be written yet.
+				if (!cancelled) setHistory([...runs.filter((r) => r.id !== run.id), run]);
+			})
+			.catch((error) => {
+				console.error("Failed to load arithmetic runs:", error);
+				if (!cancelled) setLoadError(true);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [run]);
+
+	const comparable = history ? comparableRuns(history, run.settings) : [run];
+	const lastTen = comparable.slice(-10);
+	const lastTenScores = lastTen.map((r) => r.score);
+
+	return (
+		<div className="arith-stats">
+			<section>
+				<h2>This game</h2>
+				<StatsTable stats={operationStats([run])} />
+			</section>
+
+			<section>
+				<h2>Last {lastTen.length} {lastTen.length === 1 ? "game" : "games"}</h2>
+				<p className="arith-stats-note">
+					Average score {(lastTenScores.reduce((a, b) => a + b, 0) / lastTenScores.length).toFixed(1)}, best{" "}
+					{Math.max(...lastTenScores)}. Only games with the same settings as this one are included.
+				</p>
+				<StatsTable stats={operationStats(lastTen)} />
+			</section>
+
+			<section>
+				<h2>Scores over time</h2>
+				{loadError ? (
+					<p className="arith-stats-note">Could not load saved games from this browser.</p>
+				) : (
+					<>
+						<p className="arith-stats-note">
+							All {comparable.length} {comparable.length === 1 ? "game" : "games"} with these settings; this game is highlighted.
+						</p>
+						<ScoreChart runs={comparable} currentRunId={run.id} />
+					</>
+				)}
+			</section>
+		</div>
+	);
+}
+
 function GameScreen(props: {
-	settings: GameSettings;
+	recorder: RunRecorder;
 	finished: boolean;
 	onFinish: () => void;
 	onRestart: () => void;
 	onChangeSettings: () => void;
 }) {
-	const { settings, finished, onFinish, onRestart, onChangeSettings } = props;
-	const [problem, setProblem] = useState<Problem>(() => generateProblem(settings));
+	const { recorder, finished, onFinish, onRestart, onChangeSettings } = props;
+	const [problem, setProblem] = useState<Problem>(() => recorder.currentProblem);
 	const [input, setInput] = useState("");
 	const [score, setScore] = useState(0);
-	const [secondsLeft, setSecondsLeft] = useState(settings.durationSeconds);
+	const [secondsLeft, setSecondsLeft] = useState(recorder.run.settings.durationSeconds);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		if (finished) return;
-		const endTime = Date.now() + settings.durationSeconds * 1000;
 		const tick = () => {
-			const remainingMs = endTime - Date.now();
+			const remainingMs = recorder.endsAt - Date.now();
 			setSecondsLeft(Math.max(0, Math.ceil(remainingMs / 1000)));
 			if (remainingMs <= 0) {
 				window.clearInterval(interval);
+				recorder.finish();
 				onFinish();
 			}
 		};
 		const interval = window.setInterval(tick, 100);
 		return () => window.clearInterval(interval);
-	}, [finished, settings.durationSeconds, onFinish]);
+	}, [finished, recorder, onFinish]);
 
 	useEffect(() => {
 		if (!finished) inputRef.current?.focus();
 	}, [finished]);
 
-	const handleInput = (value: string) => {
+	useEffect(() => {
+		const onVisibility = () =>
+			recorder.recordEvent(document.visibilityState === "hidden" ? "visibility-hidden" : "visibility-visible");
+		const onBlur = () => recorder.recordEvent("window-blur");
+		const onFocus = () => recorder.recordEvent("window-focus");
+		document.addEventListener("visibilitychange", onVisibility);
+		window.addEventListener("blur", onBlur);
+		window.addEventListener("focus", onFocus);
+		return () => {
+			document.removeEventListener("visibilitychange", onVisibility);
+			window.removeEventListener("blur", onBlur);
+			window.removeEventListener("focus", onFocus);
+		};
+	}, [recorder]);
+
+	const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (finished) return;
+		const value = event.target.value;
+		recorder.recordInput(value, (event.nativeEvent as InputEvent).inputType ?? "unknown");
 		if (isCorrectAnswer(value, problem)) {
-			setScore((s) => s + 1);
-			setProblem(generateProblem(settings));
+			setProblem(recorder.solveCurrent());
+			setScore(recorder.run.score);
 			setInput("");
 		} else {
 			setInput(value);
@@ -264,6 +426,7 @@ function GameScreen(props: {
 							Change settings
 						</button>
 					</div>
+					<RunResults run={recorder.run} />
 				</div>
 			) : (
 				<div className="arith-problem">
@@ -278,7 +441,10 @@ function GameScreen(props: {
 						className="arith-answer"
 						aria-label="Answer"
 						value={input}
-						onChange={(e) => handleInput(e.target.value)}
+						onChange={handleInput}
+						onKeyDown={(e) => recorder.recordKey(e.key, e.repeat)}
+						onFocus={() => recorder.recordEvent("answer-focus")}
+						onBlur={() => recorder.recordEvent("answer-blur")}
 					/>
 				</div>
 			)}
@@ -286,11 +452,50 @@ function GameScreen(props: {
 	);
 }
 
+function SavedRunsInfo() {
+	const [runs, setRuns] = useState<RunRecord[] | null>(null);
+
+	useEffect(() => {
+		let cancelled = false;
+		loadRuns()
+			.then((loaded) => !cancelled && setRuns(loaded))
+			.catch((error) => console.error("Failed to load arithmetic runs:", error));
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	if (runs === null) return null;
+
+	const exportRuns = () => {
+		const blob = new Blob([JSON.stringify(runs, null, 2)], { type: "application/json" });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = `arithmetic-runs-${new Date().toISOString().slice(0, 10)}.json`;
+		link.click();
+		URL.revokeObjectURL(url);
+	};
+
+	return (
+		<p className="arith-saved-runs">
+			{runs.length} {runs.length === 1 ? "game" : "games"} saved in this browser
+			{runs.length > 0 && (
+				<>
+					{" · "}
+					<button type="button" className="btn btn-link btn-sm p-0 align-baseline" onClick={exportRuns}>
+						Export as JSON
+					</button>
+				</>
+			)}
+		</p>
+	);
+}
+
 function ArithmeticGame() {
 	const [phase, setPhase] = useState<Phase>("settings");
 	const [settings, setSettings] = useState<GameSettings>(loadSettings);
-	// Bumped on every new game so the game screen remounts with fresh state.
-	const [gameId, setGameId] = useState(0);
+	const [recorder, setRecorder] = useState<RunRecorder | null>(null);
 
 	useEffect(() => {
 		document.title = "Arithmetic Game";
@@ -299,7 +504,7 @@ function ArithmeticGame() {
 	const startGame = (newSettings: GameSettings) => {
 		setSettings(newSettings);
 		saveSettings(newSettings);
-		setGameId((id) => id + 1);
+		setRecorder(new RunRecorder(newSettings));
 		setPhase("playing");
 	};
 
@@ -308,12 +513,15 @@ function ArithmeticGame() {
 	return (
 		<div className="arith-page">
 			<div className="arith-container">
-				{phase === "settings" ? (
-					<SettingsScreen initial={settings} onStart={startGame} />
+				{phase === "settings" || recorder === null ? (
+					<>
+						<SettingsScreen initial={settings} onStart={startGame} />
+						<SavedRunsInfo />
+					</>
 				) : (
 					<GameScreen
-						key={gameId}
-						settings={settings}
+						key={recorder.run.id}
+						recorder={recorder}
 						finished={phase === "finished"}
 						onFinish={handleFinish}
 						onRestart={() => startGame(settings)}

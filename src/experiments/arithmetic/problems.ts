@@ -13,6 +13,9 @@ export type GameSettings = {
 
 export type Problem = {
 	operation: Operation;
+	/** Operands as displayed, i.e. `${left} <op> ${right}`. */
+	left: number;
+	right: number;
 	text: string;
 	answer: number;
 };
@@ -74,24 +77,24 @@ function generateOne(settings: GameSettings, rng: () => number): Problem | null 
 		case "add": {
 			const a = randomInt(settings.addLeft, rng);
 			const b = randomInt(settings.addRight, rng);
-			return { operation, text: `${a} + ${b}`, answer: a + b };
+			return { operation, left: a, right: b, text: `${a} + ${b}`, answer: a + b };
 		}
 		case "sub": {
 			// Addition in reverse: (a + b) – a = b
 			const a = randomInt(settings.addLeft, rng);
 			const b = randomInt(settings.addRight, rng);
-			return { operation, text: `${a + b} – ${a}`, answer: b };
+			return { operation, left: a + b, right: a, text: `${a + b} – ${a}`, answer: b };
 		}
 		case "mul": {
 			const a = randomInt(settings.mulLeft, rng);
 			const b = randomInt(settings.mulRight, rng);
-			return { operation, text: `${a} × ${b}`, answer: a * b };
+			return { operation, left: a, right: b, text: `${a} × ${b}`, answer: a * b };
 		}
 		case "div": {
 			// Multiplication in reverse: (a × b) ÷ a = b
 			const a = randomInt(settings.mulLeft, rng);
 			const b = randomInt(settings.mulRight, rng);
-			return a === 0 ? null : { operation, text: `${a * b} ÷ ${a}`, answer: b };
+			return a === 0 ? null : { operation, left: a * b, right: a, text: `${a * b} ÷ ${a}`, answer: b };
 		}
 	}
 }
