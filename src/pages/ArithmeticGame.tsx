@@ -670,6 +670,15 @@ function ArithmeticGame() {
 		document.title = "Arithmetic Game";
 	}, []);
 
+	// Makes the page work offline after the first visit. The worker only exists in production
+	// builds (emitted by vite.config.ts) and its scope keeps it away from the rest of the site.
+	useEffect(() => {
+		if (!import.meta.env.PROD || !("serviceWorker" in navigator)) return;
+		navigator.serviceWorker
+			.register("/arithmetic-sw.js", { scope: "/arithmetic" })
+			.catch((error) => console.error("Failed to register the arithmetic service worker:", error));
+	}, []);
+
 	const startGame = (newSettings: GameSettings) => {
 		setSettings(newSettings);
 		saveSettings(newSettings);
