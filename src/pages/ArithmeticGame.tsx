@@ -445,6 +445,9 @@ const MINUS_KEY: KeypadKey = { label: "−", ariaLabel: "Minus", action: "minus"
 
 function Keypad(props: { showMinus: boolean; onKey: (key: KeypadKey) => void }) {
 	const keys = props.showMinus ? [...KEYPAD_KEYS, MINUS_KEY] : KEYPAD_KEYS;
+	// Pressed look is toggled on the element directly: mobile :active is unreliable and
+	// lags, and going through React state would re-render the whole keypad on every tap.
+	const release = (e: React.PointerEvent<HTMLButtonElement>) => e.currentTarget.classList.remove("arith-key-pressed");
 	return (
 		<div className="arith-keypad" role="group" aria-label="Keypad">
 			{keys.map((key) => (
@@ -453,9 +456,21 @@ function Keypad(props: { showMinus: boolean; onKey: (key: KeypadKey) => void }) 
 					type="button"
 					className={`arith-key arith-key-${key.action}`}
 					aria-label={key.ariaLabel}
-					// Keep focus (and the caret) in the answer box instead of moving it to the button.
-					onPointerDown={(e) => e.preventDefault()}
-					onClick={() => props.onKey(key)}
+					// Act on touch-down rather than on click, which only fires once the finger lifts.
+					// preventDefault also keeps focus (and the caret) in the answer box and
+					// suppresses the click that would otherwise follow.
+					onPointerDown={(e) => {
+						e.preventDefault();
+						e.currentTarget.classList.add("arith-key-pressed");
+						props.onKey(key);
+					}}
+					onPointerUp={release}
+					onPointerCancel={release}
+					onPointerLeave={release}
+					// Clicks without a pointer press (keyboard, assistive tech) still work.
+					onClick={(e) => {
+						if (e.detail === 0) props.onKey(key);
+					}}
 				>
 					{key.label}
 				</button>
@@ -474,7 +489,13 @@ function GameScreen(props: {
 }) {
 	const { recorder, theme, finished, onFinish, onRestart, onChangeSettings } = props;
 	const [problem, setProblem] = useState<Problem>(() => recorder.currentProblem);
-	const [input, setInput] = useState("");
+	const [input, setInputState] = useState("");
+	// Mirrors `input` synchronously so taps landing before React re-renders build on the latest value.
+	const inputValue = useRef("");
+	const setInput = (value: string) => {
+		inputValue.current = value;
+		setInputState(value);
+	};
 	const [score, setScore] = useState(0);
 	const [secondsLeft, setSecondsLeft] = useState(recorder.run.settings.durationSeconds);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -517,7 +538,7 @@ function GameScreen(props: {
 	const applyInput = (value: string, inputType: string) => {
 		if (finished) return;
 		recorder.recordInput(value, inputType);
-		if (isCorrectAnswer(value, problem)) {
+		if (isCorrectAnswer(value, recorder.currentProblem)) {
 			setProblem(recorder.solveCurrent());
 			setScore(recorder.run.score);
 			setInput("");
@@ -529,6 +550,7 @@ function GameScreen(props: {
 	// Keypad input types mirror InputEvent naming, so "delete…" counts as a correction in the stats.
 	const handleKeypad = (key: KeypadKey) => {
 		recorder.recordKey(`keypad:${key.ariaLabel}`, false);
+		const input = inputValue.current;
 		switch (key.action) {
 			case "digit":
 				applyInput(input + key.digit, "insertKeypadDigit");

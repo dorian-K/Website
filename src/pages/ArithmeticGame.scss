@@ -237,7 +237,8 @@
 	touch-action: manipulation;
 	-webkit-tap-highlight-color: transparent;
 
-	&:active {
+	&:active,
+	&.arith-key-pressed {
 		background: var(--arith-accent);
 		border-color: var(--arith-accent);
 		color: var(--arith-bg);

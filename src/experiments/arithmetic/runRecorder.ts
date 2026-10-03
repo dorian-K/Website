@@ -1,6 +1,9 @@
 import { GameSettings, Problem, generateProblem } from "./problems";
 import { ProblemRecord, RunEnvironment, RunEventType, RunRecord, newRunId, saveRun } from "./runStore";
 
+/** How long saves during a game are held back and merged, so solving a problem never waits on storage. */
+const SAVE_DELAY_MS = 1000;
+
 function captureEnvironment(): RunEnvironment {
 	return {
 		userAgent: navigator.userAgent,
@@ -24,6 +27,7 @@ export class RunRecorder {
 	readonly run: RunRecord;
 	/** performance.now() at the start, the origin for all `t`/`shownAt`/`solvedAt` offsets. */
 	private readonly startPerf: number;
+	private saveTimer: number | null = null;
 
 	constructor(settings: GameSettings) {
 		this.startPerf = performance.now();
@@ -91,6 +95,8 @@ export class RunRecorder {
 	recordEvent(type: RunEventType) {
 		if (!this.isActive) return;
 		this.run.events.push({ t: this.now(), type });
+		// The page may be closed while hidden; don't lose the batched-up progress.
+		if (type === "visibility-hidden") this.persist();
 	}
 
 	/** Marks the current problem solved and returns the next one. */
@@ -98,7 +104,7 @@ export class RunRecorder {
 		this.current.solvedAt = this.now();
 		this.run.score += 1;
 		const next = this.nextProblem();
-		this.persist();
+		this.schedulePersist();
 		return next;
 	}
 
@@ -110,7 +116,23 @@ export class RunRecorder {
 		return this.persist();
 	}
 
+	/**
+	 * Saving clones the whole run, which grows with every keystroke; doing that inside the
+	 * input handler delayed the next problem on slower phones. Batch it off the hot path instead.
+	 */
+	private schedulePersist() {
+		if (this.saveTimer !== null) return;
+		this.saveTimer = window.setTimeout(() => {
+			this.saveTimer = null;
+			this.persist();
+		}, SAVE_DELAY_MS);
+	}
+
 	private persist(): Promise<void> {
+		if (this.saveTimer !== null) {
+			window.clearTimeout(this.saveTimer);
+			this.saveTimer = null;
+		}
 		return saveRun(this.run).catch((error) => {
 			// Recording is best effort; never interrupt the game because storage failed.
 			console.error("Failed to save arithmetic run:", error);
