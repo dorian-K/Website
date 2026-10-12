@@ -15,6 +15,7 @@ import {
 import { RunRecorder } from "../experiments/arithmetic/runRecorder";
 import { OPERATION_LABELS, OperationStats, comparableRuns, operationStats } from "../experiments/arithmetic/runStats";
 import { RunRecord, loadRuns } from "../experiments/arithmetic/runStore";
+import { runsToCsv } from "../experiments/arithmetic/runExport";
 import "./ArithmeticGame.scss";
 
 const SETTINGS_STORAGE_KEY = "arithmetic-game-settings";
@@ -617,6 +618,7 @@ function GameScreen(props: {
 
 function SavedRunsInfo() {
 	const [runs, setRuns] = useState<RunRecord[] | null>(null);
+	const [copyStatus, setCopyStatus] = useState<string | null>(null);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -630,14 +632,30 @@ function SavedRunsInfo() {
 
 	if (runs === null) return null;
 
-	const exportRuns = () => {
-		const blob = new Blob([JSON.stringify(runs, null, 2)], { type: "application/json" });
-		const url = URL.createObjectURL(blob);
+	const today = new Date().toISOString().slice(0, 10);
+
+	const download = (content: string, type: string, fileName: string) => {
+		const url = URL.createObjectURL(new Blob([content], { type }));
 		const link = document.createElement("a");
 		link.href = url;
-		link.download = `arithmetic-runs-${new Date().toISOString().slice(0, 10)}.json`;
+		link.download = fileName;
 		link.click();
 		URL.revokeObjectURL(url);
+	};
+
+	const exportRuns = () =>
+		download(JSON.stringify(runs, null, 2), "application/json", `arithmetic-runs-${today}.json`);
+
+	const copyCsv = async () => {
+		const { csv, problems } = runsToCsv(runs);
+		try {
+			await navigator.clipboard.writeText(csv);
+			setCopyStatus(`Copied ${problems} problems`);
+		} catch {
+			// Clipboard blocked (permissions, insecure context): hand over a file instead.
+			download(csv, "text/csv", `arithmetic-history-${today}.csv`);
+			setCopyStatus("Clipboard unavailable, downloaded as CSV instead");
+		}
 	};
 
 	return (
@@ -646,9 +664,19 @@ function SavedRunsInfo() {
 			{runs.length > 0 && (
 				<>
 					{" · "}
+					<button
+						type="button"
+						className="btn btn-link btn-sm p-0 align-baseline"
+						onClick={copyCsv}
+						title="One CSV row per problem with solve times and mistakes, compact enough to paste into a chat"
+					>
+						Copy history as CSV
+					</button>
+					{" · "}
 					<button type="button" className="btn btn-link btn-sm p-0 align-baseline" onClick={exportRuns}>
 						Export as JSON
 					</button>
+					{copyStatus && <span className="arith-copy-status"> · {copyStatus}</span>}
 				</>
 			)}
 		</p>
