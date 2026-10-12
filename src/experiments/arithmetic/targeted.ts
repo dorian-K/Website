@@ -5,7 +5,8 @@ import type { ProblemRecord, RunEventType, RunRecord } from "./runStore";
  * Targeted practice: problems are grouped into "skill cells" (e.g. "8 × a number ending in 4",
  * "subtraction with a borrow"), each cell's typical solve time is estimated from the player's own
  * history, and slow cells are drawn more often. Recent attempts only, so the targets move as the
- * player improves.
+ * player improves. Within a game, problems that went slowly or wrong come back a few problems
+ * later (spaced retrieval of the exact item), so the answer is recalled rather than recomputed.
  */
 
 export type SkillCell = { key: string; label: string };
@@ -38,6 +39,12 @@ const WEIGHT_EXPONENT = 3;
 const REACHABILITY_SAMPLES = 4000;
 /** Upper bound on random draws when looking for a problem in the chosen cell. */
 const MAX_DRAWS_PER_PROBLEM = 5000;
+/** A solve slower than this multiple of the typical time sends the problem back for review. */
+const REVIEW_SLOW_FACTOR = 1.5;
+/** Problems shown in between before each review: the first comes back soon, the second later. */
+const REVIEW_GAPS = [4, 10];
+/** A deletion this long after the last change means the player believed a wrong answer, not a typo. */
+const MISCALCULATION_MS = 350;
 
 const INTERRUPTIONS: RunEventType[] = ["visibility-hidden", "window-blur", "answer-blur"];
 
@@ -97,7 +104,8 @@ export function buildWeaknessModel(runs: RunRecord[]): WeaknessModel {
 	const finished = runs.filter((run) => run.status !== "in-progress").sort((a, b) => a.startedAt - b.startedAt);
 	for (const run of finished) {
 		for (const problem of run.problems) {
-			if (problem.solvedAt === null || wasInterrupted(run, problem)) continue;
+			// Reviews are answered from short-term memory, which would make a cell look learned too early.
+			if (problem.solvedAt === null || problem.review || wasInterrupted(run, problem)) continue;
 			const ms = Math.min(Math.max(problem.solvedAt - problem.shownAt, 1), MAX_COUNTED_MS);
 			const cell = skillCell(problem);
 			const entry = attemptsByCell.get(cell.key) ?? { cell, logs: [] };
@@ -145,19 +153,36 @@ export function weakSpots(model: WeaknessModel, settings: GameSettings, limit: n
 		.slice(0, limit);
 }
 
-/** `targeted` is set only by the targeted generator; plain random play leaves it out. */
-export type GeneratedProblem = { problem: Problem; targeted?: boolean };
+/** `targeted` and `review` are set only by the targeted source; plain random play leaves them out. */
+export type GeneratedProblem = { problem: Problem; targeted?: boolean; review?: boolean };
+
+/** Supplies a game's problems; `solved` lets an adaptive source react to how each one went. */
+export type ProblemSource = {
+	next: () => GeneratedProblem;
+	solved?: (record: ProblemRecord) => void;
+};
+
+/** Whether a wrong answer stood long enough to be a believed miscalculation rather than a typo. */
+export function hadMiscalculation(record: ProblemRecord): boolean {
+	return record.inputs.some(
+		(input, i) =>
+			i > 0 &&
+			input.inputType.startsWith("delete") &&
+			record.inputs[i - 1].value !== "" &&
+			input.t - record.inputs[i - 1].t >= MISCALCULATION_MS,
+	);
+}
 
 /**
- * Returns a problem source for one game. Each call draws a weak cell (weighted by how slow it is,
- * among the cells the settings can produce) and then a random problem from that cell, or, for
- * 1 − TARGETED_SHARE of problems, a plain random problem.
+ * Returns a problem source for one game. A due review comes first; otherwise it draws a weak cell
+ * (weighted by how slow it is, among the cells the settings can produce) and then a random problem
+ * from that cell, or, for 1 − TARGETED_SHARE of problems, a plain random problem.
  */
 export function targetedGenerator(
 	model: WeaknessModel,
 	settings: GameSettings,
 	rng: () => number = Math.random,
-): () => GeneratedProblem {
+): ProblemSource {
 	const candidates = [...reachableCells(settings, rng).values()].map(({ cell }) => ({
 		cell,
 		weight: (estimateFor(model, cell).estimateMs / model.typicalMs) ** WEIGHT_EXPONENT,
@@ -187,11 +212,38 @@ export function targetedGenerator(
 		return { problem: generateProblem(settings, rng), targeted: false };
 	};
 
-	return () => {
-		// Avoid showing the exact same problem twice in a row, which small cells make likely.
-		let next = draw();
-		if (next.problem.text === previousText) next = draw();
-		previousText = next.problem.text;
-		return next;
+	// Problems waiting to come back, with how many more problems must pass first.
+	const reviews: { problem: Problem; wait: number; done: number }[] = [];
+	let current: { problem: Problem; reviewsDone: number } | null = null;
+
+	const next = (): GeneratedProblem => {
+		reviews.forEach((r) => r.wait--);
+		const due = reviews.findIndex((r) => r.wait <= 0);
+		let result: GeneratedProblem;
+		if (due !== -1) {
+			const [review] = reviews.splice(due, 1);
+			result = { problem: review.problem, targeted: true, review: true };
+			current = { problem: review.problem, reviewsDone: review.done + 1 };
+		} else {
+			// Avoid showing the exact same problem twice in a row, which small cells make likely.
+			result = draw();
+			if (result.problem.text === previousText) result = draw();
+			current = { problem: result.problem, reviewsDone: 0 };
+		}
+		previousText = result.problem.text;
+		return result;
 	};
+
+	const solved = (record: ProblemRecord) => {
+		if (!current || record.solvedAt === null) return;
+		const struggled =
+			record.solvedAt - record.shownAt > REVIEW_SLOW_FACTOR * model.typicalMs || hadMiscalculation(record);
+		const { problem, reviewsDone } = current;
+		// A clean, quick review means it stuck; otherwise it comes back once more, further out.
+		if (struggled && reviewsDone < REVIEW_GAPS.length) {
+			reviews.push({ problem, wait: REVIEW_GAPS[reviewsDone], done: reviewsDone });
+		}
+	};
+
+	return { next, solved };
 }

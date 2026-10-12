@@ -70,7 +70,7 @@ export function runsToCsv(runs: RunRecord[]): { csv: string; problems: number } 
 
 	const header = [
 		"# Arithmetic game history: one row per problem, oldest first. Times in milliseconds.",
-		"# mode: normal or targeted (more problems from weak spots).",
+		"# mode: normal = competition (random problems), targeted = practice (weak spots and repeats).",
 		"# solve_ms is empty for the problem left unsolved when time ran out.",
 		"# first_key_ms: problem shown -> first input. inputs: changes to the answer box.",
 		"# wrong: what was in the box before each deletion (| separated). interrupted: focus left the game during the problem.",

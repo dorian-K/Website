@@ -110,6 +110,45 @@
 	}
 }
 
+.arith-modes {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+	gap: 0.75rem;
+	margin: 0 0 1.5rem;
+	padding: 0;
+	border: 0;
+}
+
+.arith-mode {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: baseline;
+	gap: 0.15rem 0.6rem;
+	padding: 0.75rem 1rem;
+	border: 1px solid var(--arith-rule);
+	border-radius: var(--arith-radius);
+	cursor: pointer;
+
+	.form-check-input {
+		margin: 0;
+	}
+}
+
+.arith-mode-selected {
+	border-color: var(--arith-accent);
+	background: var(--arith-panel);
+}
+
+.arith-mode-name {
+	font-weight: 600;
+}
+
+.arith-mode-description {
+	grid-column: 2;
+	color: var(--arith-muted);
+	font-size: 0.9rem;
+}
+
 .arith-weak-spots {
 	margin: -0.75rem 0 1.5rem;
 	padding: 0.75rem 1rem;
@@ -160,6 +199,16 @@
 	background: var(--arith-panel);
 	font-variant-numeric: tabular-nums;
 	font-size: 1.1rem;
+}
+
+.arith-review-tag {
+	flex-basis: 100%;
+	text-align: center;
+	color: var(--arith-accent);
+	font-size: 0.9rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
 }
 
 .arith-mode-tag {

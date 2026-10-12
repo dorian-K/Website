@@ -31,12 +31,14 @@ function multiplyHint(f: number, p: number): string | null {
 			return `Double ${p}: ${head} = ${answer}.`;
 		case 4:
 			return `Double twice: ${p} → ${2 * p} → ${answer}.`;
-		case 8:
-			return `Double three times: ${p} → ${2 * p} → ${4 * p} → ${answer}.`;
 		case 5:
-			return `Times 10, then halve: ${p * 10} ÷ 2 = ${answer}.`;
+			return p % 2 === 0
+				? `Halve first, then append a zero: ${p} → ${p / 2} → ${answer}.`
+				: `Times 10, then halve: ${p * 10} ÷ 2 = ${answer}.`;
 		case 9:
-			return `Times 10, minus once: ${p * 10} − ${p} = ${answer}.`;
+			// Subtracting is only easier when the split would need a big units product.
+			if (p % 10 >= 5) return `Times 10, minus once: ${p * 10} − ${p} = ${answer}.`;
+			break;
 		case 11: {
 			const tens = Math.floor(p / 10);
 			const units = p % 10;
@@ -74,17 +76,24 @@ function divideHint(dividend: number, divisor: number, quotient: number): string
 			return `Halve it: ${head} = ${quotient}.`;
 		case 4:
 			return `Halve twice: ${dividend} → ${dividend / 2} → ${quotient}.`;
-		case 8:
-			return `Halve three times: ${dividend} → ${dividend / 2} → ${dividend / 4} → ${quotient}.`;
 		case 5:
 			return `Double, then drop the zero: ${dividend * 2} ÷ 10 = ${quotient}.`;
 		case 10:
 			return `Drop the zero: ${head} = ${quotient}.`;
 	}
-	// Peel off the largest round multiple of the divisor, then the rest is a table fact.
 	const units = quotient % 10;
 	const tensPart = quotient - units;
 	if (units === 0) return `${divisor} × ${tensPart / 10} = ${dividend / 10}, so ${head} = ${quotient}.`;
+	if (quotient < 100 && divisor % 2 !== 0 && divisor % 5 !== 0) {
+		// For divisors sharing no factor with 10, exactly one digit d makes divisor × d end in the
+		// dividend's last digit, so the answer's units digit is read off directly.
+		const lastDigit = dividend % 10;
+		return (
+			`Last digit first: ${divisor} × ${units} = ${divisor * units} ends in ${lastDigit}, so the answer ends in ${units}. ` +
+			`Size: ${divisor} × ${tensPart} = ${divisor * tensPart} and ${divisor} × ${tensPart + 10} = ${divisor * (tensPart + 10)}, so it's ${quotient}.`
+		);
+	}
+	// Otherwise peel off the largest round multiple of the divisor; the rest is a table fact.
 	return `Peel off a round chunk: ${divisor} × ${tensPart} = ${divisor * tensPart}, leaving ${dividend - divisor * tensPart} = ${divisor} × ${units}. So ${quotient}.`;
 }
 
@@ -117,5 +126,12 @@ function subtractHint(m: number, s: number): string | null {
 	}
 	const tensPart = s - units;
 	if (units === 0 || tensPart === 0) return null;
+	if (m % 10 < units) {
+		// With a borrow, read the last digit off the units and place it just below m − tens.
+		return (
+			`Last digit first: ${(m % 10) + 10} − ${units} = ${(m % 10) + 10 - units}. ` +
+			`${m} − ${tensPart} = ${m - tensPart}, and the answer is just below that: ${diff}.`
+		);
+	}
 	return `Tens first: ${m} − ${tensPart} = ${m - tensPart}, then − ${units} = ${diff}.`;
 }

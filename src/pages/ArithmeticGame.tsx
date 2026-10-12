@@ -108,10 +108,20 @@ const saveTheme = (theme: Theme) => {
 	}
 };
 
-const MODES: { value: GameMode; label: string }[] = [
-	{ value: "normal", label: "Random" },
-	{ value: "targeted", label: "Targeted at my weak spots" },
+// Stored as "normal" / "targeted" (the values saved with every run); shown as Competition / Practice.
+const MODES: { value: GameMode; label: string; description: string }[] = [
+	{
+		value: "normal",
+		label: "Competition",
+		description: "Random problems, like zetamac. This is your official score history.",
+	},
+	{
+		value: "targeted",
+		label: "Practice",
+		description: "More of your slow problems, and ones that go badly come back a few problems later. Scores are kept separately.",
+	},
 ];
+const MODE_LABELS: Record<GameMode, string> = { normal: "Competition", targeted: "Practice" };
 
 const loadMode = (): GameMode => {
 	try {
@@ -130,7 +140,7 @@ const saveMode = (mode: GameMode) => {
 	}
 };
 
-/** Previews what targeted mode will focus on with the given settings, from the saved history. */
+/** Previews what practice mode will focus on with the given settings, from the saved history. */
 function WeakSpotsPreview(props: { settings: GameSettings | null }) {
 	const [runs, setRuns] = useState<RunRecord[] | null>(null);
 
@@ -155,10 +165,10 @@ function WeakSpotsPreview(props: { settings: GameSettings | null }) {
 	return (
 		<div className="arith-weak-spots">
 			{spots.length === 0 ? (
-				<p>No history yet: play a few games and targeted mode will find your slow spots.</p>
+				<p>No history yet: play a few games and practice mode will find your slow spots.</p>
 			) : (
 				<>
-					<p>About 3 in 4 problems come from your slowest kinds of problem, the slower the more often. Right now:</p>
+					<p>About 3 in 4 problems come from your slowest kinds of problem, the slower the more often. Right now these are:</p>
 					<ul>
 						{spots.map((spot) => (
 							<li key={spot.cell.key}>
@@ -169,7 +179,6 @@ function WeakSpotsPreview(props: { settings: GameSettings | null }) {
 							</li>
 						))}
 					</ul>
-					<p>Targeted games have their own score history, separate from random games.</p>
 				</>
 			)}
 		</div>
@@ -256,6 +265,25 @@ function SettingsScreen(props: {
 			</p>
 
 			<form onSubmit={handleSubmit}>
+				<fieldset className="arith-modes">
+					<legend className="visually-hidden">Mode</legend>
+					{MODES.map((mode) => (
+						<label key={mode.value} className={`arith-mode${props.mode === mode.value ? " arith-mode-selected" : ""}`}>
+							<input
+								type="radio"
+								name="arith-mode"
+								className="form-check-input"
+								value={mode.value}
+								checked={props.mode === mode.value}
+								onChange={() => props.onModeChange(mode.value)}
+							/>
+							<span className="arith-mode-name">{mode.label}</span>
+							<span className="arith-mode-description">{mode.description}</span>
+						</label>
+					))}
+				</fieldset>
+				{props.mode === "targeted" && <WeakSpotsPreview settings={previewSettings} />}
+
 				<div className="arith-op">
 					{operationCheckbox("add", "Addition")}
 					<div className="arith-op-detail">
@@ -300,22 +328,6 @@ function SettingsScreen(props: {
 					</select>
 				</div>
 
-				<div className="arith-select-row">
-					<label htmlFor="arith-mode">Problems:</label>
-					<select
-						id="arith-mode"
-						className="form-select form-select-sm"
-						value={props.mode}
-						onChange={(e) => props.onModeChange(e.target.value as GameMode)}
-					>
-						{MODES.map((mode) => (
-							<option key={mode.value} value={mode.value}>
-								{mode.label}
-							</option>
-						))}
-					</select>
-				</div>
-				{props.mode === "targeted" && <WeakSpotsPreview settings={previewSettings} />}
 
 				<div className="arith-select-row">
 					<label htmlFor="arith-theme">Theme:</label>
@@ -464,7 +476,10 @@ function SlowestProblems(props: { run: RunRecord }) {
 								<span className="arith-slowest-problem">
 									{problem.left} {OPERATION_SYMBOLS[problem.operation]} {problem.right} = {problem.answer}
 								</span>
-								<span className="arith-slowest-time">{formatSeconds(ms)}</span>
+								<span className="arith-slowest-time">
+									{problem.review && "repeat · "}
+									{formatSeconds(ms)}
+								</span>
 							</div>
 							{wrong.length > 0 && <div className="arith-slowest-wrong">You typed {wrong.join(", ")} first.</div>}
 							{hint && <div className="arith-slowest-hint">{hint}</div>}
@@ -472,6 +487,29 @@ function SlowestProblems(props: { run: RunRecord }) {
 					);
 				})}
 			</ol>
+		</section>
+	);
+}
+
+/** How problems that came back for review went compared with the first time (practice mode). */
+function ReviewSummary(props: { run: RunRecord }) {
+	const solveMs = (p: RunRecord["problems"][number]) => p.solvedAt! - p.shownAt;
+	const pairs = props.run.problems
+		.filter((p) => p.review && p.solvedAt !== null)
+		.flatMap((review) => {
+			const first = props.run.problems.find((p) => p.text === review.text && !p.review && p.solvedAt !== null);
+			return first ? [{ firstMs: solveMs(first), reviewMs: solveMs(review) }] : [];
+		});
+	if (pairs.length === 0) return null;
+	const mean = (values: number[]) => values.reduce((a, b) => a + b, 0) / values.length;
+	return (
+		<section>
+			<h2>Repeats</h2>
+			<p className="arith-stats-note">
+				{pairs.length} {pairs.length === 1 ? "problem" : "problems"} came back after a slow or wrong first try:{" "}
+				{formatSeconds(mean(pairs.map((p) => p.firstMs)))} on average the first time,{" "}
+				{formatSeconds(mean(pairs.map((p) => p.reviewMs)))} on the repeat.
+			</p>
 		</section>
 	);
 }
@@ -499,7 +537,7 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 
 	const mode = run.mode ?? "normal";
 	const comparable = history ? comparableRuns(history, run.settings, mode) : [run];
-	const sameKind = mode === "targeted" ? "targeted games with the same settings" : "games with the same settings";
+	const sameKind = `${MODE_LABELS[mode].toLowerCase()} games with the same settings`;
 	const lastTen = comparable.slice(-10);
 	const lastTenScores = lastTen.map((r) => r.score);
 	const startOfToday = new Date().setHours(0, 0, 0, 0);
@@ -508,6 +546,7 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 	return (
 		<div className="arith-stats">
 			<SlowestProblems run={run} />
+			<ReviewSummary run={run} />
 
 			<section>
 				<h2>This game</h2>
@@ -542,7 +581,7 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 				) : (
 					<>
 						<p className="arith-stats-note">
-							All {comparable.length} {mode === "targeted" ? "targeted " : ""}{comparable.length === 1 ? "game" : "games"} with these settings; this game is highlighted.
+							All {comparable.length} {MODE_LABELS[mode].toLowerCase()} {comparable.length === 1 ? "game" : "games"} with these settings; this game is highlighted.
 						</p>
 						<ScoreChart runs={comparable} currentRunId={run.id} theme={theme} />
 					</>
@@ -634,6 +673,8 @@ function GameScreen(props: {
 	const [secondsLeft, setSecondsLeft] = useState(recorder.run.settings.durationSeconds);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const showKeypad = useCoarsePointer();
+	// Practice mode brings back problems that went badly; flag them so they're recalled, not recomputed.
+	const isReview = recorder.run.problems[recorder.run.problems.length - 1]?.review === true;
 
 	useEffect(() => {
 		if (finished) return;
@@ -705,7 +746,7 @@ function GameScreen(props: {
 		<div className="arith-game">
 			<div className="arith-banner">
 				<span>Seconds left: {secondsLeft}</span>
-				{recorder.run.mode === "targeted" && <span className="arith-mode-tag">Targeted</span>}
+				{recorder.run.mode === "targeted" && <span className="arith-mode-tag">Practice</span>}
 				<span>Score: {score}</span>
 			</div>
 
@@ -725,6 +766,12 @@ function GameScreen(props: {
 			) : (
 				<>
 				<div className="arith-problem">
+					{recorder.run.mode === "targeted" && (
+						// Always rendered in practice mode so the problem doesn't jump when the label appears.
+						<span className="arith-review-tag" aria-hidden={!isReview} style={{ visibility: isReview ? "visible" : "hidden" }}>
+							again
+						</span>
+					)}
 					<span className="arith-problem-text">{problem.text} =</span>
 					<input
 						ref={inputRef}

@@ -32,6 +32,8 @@ export type ProblemRecord = {
 	keys: KeyRecord[];
 	/** Targeted mode only: whether the problem was drawn from a weak spot (false = plain random filler). */
 	targeted?: boolean;
+	/** Targeted mode only: a repeat of a problem from earlier in the same game that went slowly or wrong. */
+	review?: boolean;
 };
 
 export type RunEventType =
