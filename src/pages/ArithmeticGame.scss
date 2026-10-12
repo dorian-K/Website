@@ -110,6 +110,43 @@
 	}
 }
 
+.arith-weak-spots {
+	margin: -0.75rem 0 1.5rem;
+	padding: 0.75rem 1rem;
+	border-radius: var(--arith-radius);
+	background: var(--arith-panel);
+	color: var(--arith-muted);
+	font-size: 0.9rem;
+
+	p {
+		margin: 0;
+	}
+
+	ul {
+		list-style: none;
+		margin: 0.5rem 0;
+		padding: 0;
+	}
+
+	li {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0 1rem;
+		padding: 0.2rem 0;
+		border-bottom: 1px solid var(--arith-rule);
+	}
+}
+
+.arith-weak-label {
+	color: var(--arith-fg);
+	font-weight: 600;
+}
+
+.arith-weak-time {
+	font-variant-numeric: tabular-nums;
+}
+
 .arith-errors {
 	color: var(--arith-error);
 	padding-left: 1.2rem;
@@ -123,6 +160,11 @@
 	background: var(--arith-panel);
 	font-variant-numeric: tabular-nums;
 	font-size: 1.1rem;
+}
+
+.arith-mode-tag {
+	color: var(--arith-accent);
+	font-weight: 600;
 }
 
 .arith-problem {
@@ -188,6 +230,43 @@
 		font-size: 1.25rem;
 		margin-bottom: 0.5rem;
 	}
+}
+
+.arith-slowest {
+	margin: 0;
+	padding-left: 1.4rem;
+
+	li {
+		padding: 0.5rem 0;
+		border-bottom: 1px solid var(--arith-rule);
+	}
+}
+
+.arith-slowest-head {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 0 1rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.arith-slowest-problem {
+	font-weight: 600;
+}
+
+.arith-slowest-time,
+.arith-slowest-wrong {
+	color: var(--arith-muted);
+}
+
+.arith-slowest-wrong {
+	font-size: 0.9rem;
+}
+
+.arith-slowest-hint {
+	margin-top: 0.15rem;
+	color: var(--arith-accent);
+	font-size: 0.95rem;
 }
 
 .arith-stats-note {

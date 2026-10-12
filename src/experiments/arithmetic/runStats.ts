@@ -1,5 +1,5 @@
 import type { GameSettings, Operation } from "./problems";
-import type { ProblemRecord, RunRecord } from "./runStore";
+import type { GameMode, ProblemRecord, RunRecord } from "./runStore";
 
 export const OPERATION_LABELS: Record<Operation, string> = {
 	add: "Addition",
@@ -76,9 +76,11 @@ export function sameSettings(a: GameSettings, b: GameSettings): boolean {
 	return canonical(a) === canonical(b);
 }
 
-/** Completed runs played with the same settings, oldest first. */
-export function comparableRuns(runs: RunRecord[], settings: GameSettings): RunRecord[] {
+/** Completed runs played with the same settings and mode, oldest first. Targeted games are harder by design, so they get their own history. */
+export function comparableRuns(runs: RunRecord[], settings: GameSettings, mode: GameMode): RunRecord[] {
 	return runs
-		.filter((run) => run.status === "completed" && sameSettings(run.settings, settings))
+		.filter(
+			(run) => run.status === "completed" && sameSettings(run.settings, settings) && (run.mode ?? "normal") === mode,
+		)
 		.sort((a, b) => a.startedAt - b.startedAt);
 }

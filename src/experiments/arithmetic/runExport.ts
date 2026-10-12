@@ -19,7 +19,7 @@ const describeSettings = (s: GameSettings) => {
 };
 
 /** Values the answer box held right before each deletion, i.e. the wrong (partial) answers. */
-const wrongValues = (problem: ProblemRecord) =>
+export const wrongValues = (problem: ProblemRecord) =>
 	problem.inputs.flatMap((input, i) =>
 		input.inputType.startsWith("delete") && i > 0 && problem.inputs[i - 1].value !== ""
 			? [problem.inputs[i - 1].value]
@@ -54,6 +54,7 @@ export function runsToCsv(runs: RunRecord[]): { csv: string; problems: number } 
 					gameIndex + 1,
 					date,
 					settings,
+					run.mode ?? "normal",
 					p.index + 1,
 					`${p.left}${OPERATION_SYMBOLS[p.operation]}${p.right}`,
 					p.answer,
@@ -69,11 +70,12 @@ export function runsToCsv(runs: RunRecord[]): { csv: string; problems: number } 
 
 	const header = [
 		"# Arithmetic game history: one row per problem, oldest first. Times in milliseconds.",
+		"# mode: normal or targeted (more problems from weak spots).",
 		"# solve_ms is empty for the problem left unsolved when time ran out.",
 		"# first_key_ms: problem shown -> first input. inputs: changes to the answer box.",
 		"# wrong: what was in the box before each deletion (| separated). interrupted: focus left the game during the problem.",
 		...settingsList.map((s, i) => `# S${i + 1}: ${describeSettings(s)}`),
-		"game,started,settings,n,problem,answer,solve_ms,first_key_ms,inputs,wrong,interrupted",
+		"game,started,settings,mode,n,problem,answer,solve_ms,first_key_ms,inputs,wrong,interrupted",
 	];
 	return { csv: [...header, ...rows].join("\n") + "\n", problems: rows.length };
 }

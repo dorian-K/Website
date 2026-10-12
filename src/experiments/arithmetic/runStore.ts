@@ -30,6 +30,8 @@ export type ProblemRecord = {
 	solvedAt: number | null;
 	inputs: InputRecord[];
 	keys: KeyRecord[];
+	/** Targeted mode only: whether the problem was drawn from a weak spot (false = plain random filler). */
+	targeted?: boolean;
 };
 
 export type RunEventType =
@@ -54,6 +56,9 @@ export type RunEnvironment = {
 	coarsePointer: boolean;
 };
 
+/** "targeted" draws more problems from the player's weak spots. Runs saved before modes existed are "normal". */
+export type GameMode = "normal" | "targeted";
+
 export type RunStatus = "in-progress" | "completed" | "abandoned";
 
 export type RunRecord = {
@@ -64,6 +69,8 @@ export type RunRecord = {
 	startedAt: number;
 	endedAt: number | null;
 	settings: GameSettings;
+	/** Absent on runs saved before modes existed, which were normal games. */
+	mode?: GameMode;
 	score: number;
 	problems: ProblemRecord[];
 	events: RunEvent[];

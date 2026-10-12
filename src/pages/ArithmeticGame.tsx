@@ -1,4 +1,4 @@
-import React, { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import React, { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Chart from "react-apexcharts";
 import type { ApexOptions } from "apexcharts";
 import {
@@ -14,12 +14,15 @@ import {
 } from "../experiments/arithmetic/problems";
 import { RunRecorder } from "../experiments/arithmetic/runRecorder";
 import { OPERATION_LABELS, OperationStats, comparableRuns, operationStats } from "../experiments/arithmetic/runStats";
-import { RunRecord, loadRuns } from "../experiments/arithmetic/runStore";
-import { runsToCsv } from "../experiments/arithmetic/runExport";
+import { GameMode, RunRecord, loadRuns } from "../experiments/arithmetic/runStore";
+import { runsToCsv, wrongValues } from "../experiments/arithmetic/runExport";
+import { shortcutHint } from "../experiments/arithmetic/hints";
+import { buildWeaknessModel, targetedGenerator, weakSpots } from "../experiments/arithmetic/targeted";
 import "./ArithmeticGame.scss";
 
 const SETTINGS_STORAGE_KEY = "arithmetic-game-settings";
 const THEME_STORAGE_KEY = "arithmetic-game-theme";
+const MODE_STORAGE_KEY = "arithmetic-game-mode";
 
 type Theme = "dark" | "classic";
 const THEMES: { value: Theme; label: string }[] = [
@@ -105,6 +108,74 @@ const saveTheme = (theme: Theme) => {
 	}
 };
 
+const MODES: { value: GameMode; label: string }[] = [
+	{ value: "normal", label: "Random" },
+	{ value: "targeted", label: "Targeted at my weak spots" },
+];
+
+const loadMode = (): GameMode => {
+	try {
+		if (localStorage.getItem(MODE_STORAGE_KEY) === "targeted") return "targeted";
+	} catch {
+		// Storage unavailable; fall back to the default.
+	}
+	return "normal";
+};
+
+const saveMode = (mode: GameMode) => {
+	try {
+		localStorage.setItem(MODE_STORAGE_KEY, mode);
+	} catch {
+		// Ignore: remembering the mode is only a convenience.
+	}
+};
+
+/** Previews what targeted mode will focus on with the given settings, from the saved history. */
+function WeakSpotsPreview(props: { settings: GameSettings | null }) {
+	const [runs, setRuns] = useState<RunRecord[] | null>(null);
+
+	useEffect(() => {
+		let cancelled = false;
+		loadRuns()
+			.then((loaded) => !cancelled && setRuns(loaded))
+			.catch((error) => console.error("Failed to load arithmetic runs:", error));
+		return () => {
+			cancelled = true;
+		};
+	}, []);
+
+	const settingsKey = props.settings ? JSON.stringify(props.settings) : null;
+	const spots = useMemo(
+		() => (runs && props.settings ? weakSpots(buildWeaknessModel(runs), props.settings, 5) : null),
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- settingsKey stands in for settings
+		[runs, settingsKey],
+	);
+
+	if (spots === null) return null;
+	return (
+		<div className="arith-weak-spots">
+			{spots.length === 0 ? (
+				<p>No history yet: play a few games and targeted mode will find your slow spots.</p>
+			) : (
+				<>
+					<p>About 3 in 4 problems come from your slowest kinds of problem, the slower the more often. Right now:</p>
+					<ul>
+						{spots.map((spot) => (
+							<li key={spot.cell.key}>
+								<span className="arith-weak-label">{spot.cell.label}</span>
+								<span className="arith-weak-time">
+									{(spot.estimateMs / 1000).toFixed(1)} s typical · {spot.attempts} recent
+								</span>
+							</li>
+						))}
+					</ul>
+					<p>Targeted games have their own score history, separate from random games.</p>
+				</>
+			)}
+		</div>
+	);
+}
+
 function RangeInputs(props: {
 	draft: SettingsDraft;
 	rangeKey: RangeKey;
@@ -135,6 +206,8 @@ function SettingsScreen(props: {
 	onStart: (settings: GameSettings) => void;
 	theme: Theme;
 	onThemeChange: (theme: Theme) => void;
+	mode: GameMode;
+	onModeChange: (mode: GameMode) => void;
 }) {
 	const [draft, setDraft] = useState<SettingsDraft>(() => toDraft(props.initial));
 	const [errors, setErrors] = useState<string[]>([]);
@@ -167,6 +240,9 @@ function SettingsScreen(props: {
 			{label}
 		</label>
 	);
+
+	const draftSettings = fromDraft(draft);
+	const previewSettings = validateSettings(draftSettings).length === 0 ? draftSettings : null;
 
 	const addRangesUsed = draft.operations.add || draft.operations.sub;
 	const mulRangesUsed = draft.operations.mul || draft.operations.div;
@@ -223,6 +299,23 @@ function SettingsScreen(props: {
 						))}
 					</select>
 				</div>
+
+				<div className="arith-select-row">
+					<label htmlFor="arith-mode">Problems:</label>
+					<select
+						id="arith-mode"
+						className="form-select form-select-sm"
+						value={props.mode}
+						onChange={(e) => props.onModeChange(e.target.value as GameMode)}
+					>
+						{MODES.map((mode) => (
+							<option key={mode.value} value={mode.value}>
+								{mode.label}
+							</option>
+						))}
+					</select>
+				</div>
+				{props.mode === "targeted" && <WeakSpotsPreview settings={previewSettings} />}
 
 				<div className="arith-select-row">
 					<label htmlFor="arith-theme">Theme:</label>
@@ -347,6 +440,42 @@ function ScoreChart(props: { runs: RunRecord[]; currentRunId: string; theme: The
 	return <Chart key={theme} options={options} series={[{ name: "Score", data }]} type="line" height={280} />;
 }
 
+const OPERATION_SYMBOLS = { add: "+", sub: "–", mul: "×", div: "÷" } as const;
+
+/** The game's slowest solved problems, each with what went wrong and a quicker way to solve it. */
+function SlowestProblems(props: { run: RunRecord }) {
+	const slowest = props.run.problems
+		.filter((p) => p.solvedAt !== null)
+		.map((p) => ({ problem: p, ms: p.solvedAt! - p.shownAt }))
+		.sort((a, b) => b.ms - a.ms)
+		.slice(0, 5);
+	if (slowest.length === 0) return null;
+
+	return (
+		<section>
+			<h2>Slowest problems</h2>
+			<ol className="arith-slowest">
+				{slowest.map(({ problem, ms }) => {
+					const wrong = wrongValues(problem);
+					const hint = shortcutHint(problem);
+					return (
+						<li key={problem.index}>
+							<div className="arith-slowest-head">
+								<span className="arith-slowest-problem">
+									{problem.left} {OPERATION_SYMBOLS[problem.operation]} {problem.right} = {problem.answer}
+								</span>
+								<span className="arith-slowest-time">{formatSeconds(ms)}</span>
+							</div>
+							{wrong.length > 0 && <div className="arith-slowest-wrong">You typed {wrong.join(", ")} first.</div>}
+							{hint && <div className="arith-slowest-hint">{hint}</div>}
+						</li>
+					);
+				})}
+			</ol>
+		</section>
+	);
+}
+
 function RunResults(props: { run: RunRecord; theme: Theme }) {
 	const { run, theme } = props;
 	const [history, setHistory] = useState<RunRecord[] | null>(null);
@@ -368,7 +497,9 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 		};
 	}, [run]);
 
-	const comparable = history ? comparableRuns(history, run.settings) : [run];
+	const mode = run.mode ?? "normal";
+	const comparable = history ? comparableRuns(history, run.settings, mode) : [run];
+	const sameKind = mode === "targeted" ? "targeted games with the same settings" : "games with the same settings";
 	const lastTen = comparable.slice(-10);
 	const lastTenScores = lastTen.map((r) => r.score);
 	const startOfToday = new Date().setHours(0, 0, 0, 0);
@@ -376,6 +507,8 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 
 	return (
 		<div className="arith-stats">
+			<SlowestProblems run={run} />
+
 			<section>
 				<h2>This game</h2>
 				<StatsTable stats={operationStats([run])} />
@@ -387,8 +520,8 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 					<p className="arith-stats-note">
 						{todayScores.length} {todayScores.length === 1 ? "game" : "games"}: highest {Math.max(...todayScores)},
 						lowest {Math.min(...todayScores)}, average{" "}
-						{(todayScores.reduce((a, b) => a + b, 0) / todayScores.length).toFixed(1)}. Only games with the same
-						settings as this one are included.
+						{(todayScores.reduce((a, b) => a + b, 0) / todayScores.length).toFixed(1)}. Only {sameKind} as this
+						one are included.
 					</p>
 				</section>
 			)}
@@ -397,7 +530,7 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 				<h2>Last {lastTen.length} {lastTen.length === 1 ? "game" : "games"}</h2>
 				<p className="arith-stats-note">
 					Average score {(lastTenScores.reduce((a, b) => a + b, 0) / lastTenScores.length).toFixed(1)}, best{" "}
-					{Math.max(...lastTenScores)}. Only games with the same settings as this one are included.
+					{Math.max(...lastTenScores)}. Only {sameKind} as this one are included.
 				</p>
 				<StatsTable stats={operationStats(lastTen)} />
 			</section>
@@ -409,7 +542,7 @@ function RunResults(props: { run: RunRecord; theme: Theme }) {
 				) : (
 					<>
 						<p className="arith-stats-note">
-							All {comparable.length} {comparable.length === 1 ? "game" : "games"} with these settings; this game is highlighted.
+							All {comparable.length} {mode === "targeted" ? "targeted " : ""}{comparable.length === 1 ? "game" : "games"} with these settings; this game is highlighted.
 						</p>
 						<ScoreChart runs={comparable} currentRunId={run.id} theme={theme} />
 					</>
@@ -572,6 +705,7 @@ function GameScreen(props: {
 		<div className="arith-game">
 			<div className="arith-banner">
 				<span>Seconds left: {secondsLeft}</span>
+				{recorder.run.mode === "targeted" && <span className="arith-mode-tag">Targeted</span>}
 				<span>Score: {score}</span>
 			</div>
 
@@ -688,6 +822,8 @@ function ArithmeticGame() {
 	const [settings, setSettings] = useState<GameSettings>(loadSettings);
 	const [recorder, setRecorder] = useState<RunRecorder | null>(null);
 	const [theme, setTheme] = useState<Theme>(loadTheme);
+	const [mode, setMode] = useState<GameMode>(loadMode);
+	const starting = useRef(false);
 
 	const changeTheme = (newTheme: Theme) => {
 		setTheme(newTheme);
@@ -707,11 +843,30 @@ function ArithmeticGame() {
 			.catch((error) => console.error("Failed to register the arithmetic service worker:", error));
 	}, []);
 
-	const startGame = (newSettings: GameSettings) => {
+	const changeMode = (newMode: GameMode) => {
+		setMode(newMode);
+		saveMode(newMode);
+	};
+
+	const startGame = async (newSettings: GameSettings) => {
+		if (starting.current) return;
+		starting.current = true;
 		setSettings(newSettings);
 		saveSettings(newSettings);
-		setRecorder(new RunRecorder(newSettings));
+		let recorder: RunRecorder;
+		if (mode === "targeted") {
+			// Rebuilt for every game, so the previous game's results already count.
+			const runs = await loadRuns().catch((error) => {
+				console.error("Failed to load arithmetic runs:", error);
+				return [];
+			});
+			recorder = new RunRecorder(newSettings, "targeted", targetedGenerator(buildWeaknessModel(runs), newSettings));
+		} else {
+			recorder = new RunRecorder(newSettings);
+		}
+		setRecorder(recorder);
 		setPhase("playing");
+		starting.current = false;
 	};
 
 	const handleFinish = useCallback(() => setPhase("finished"), []);
@@ -721,7 +876,14 @@ function ArithmeticGame() {
 			<div className="arith-container">
 				{phase === "settings" || recorder === null ? (
 					<>
-						<SettingsScreen initial={settings} onStart={startGame} theme={theme} onThemeChange={changeTheme} />
+						<SettingsScreen
+							initial={settings}
+							onStart={startGame}
+							theme={theme}
+							onThemeChange={changeTheme}
+							mode={mode}
+							onModeChange={changeMode}
+						/>
 						<SavedRunsInfo />
 					</>
 				) : (

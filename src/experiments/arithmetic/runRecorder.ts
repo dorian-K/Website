@@ -1,5 +1,6 @@
 import { GameSettings, Problem, generateProblem } from "./problems";
-import { ProblemRecord, RunEnvironment, RunEventType, RunRecord, newRunId, saveRun } from "./runStore";
+import { GameMode, ProblemRecord, RunEnvironment, RunEventType, RunRecord, newRunId, saveRun } from "./runStore";
+import type { GeneratedProblem } from "./targeted";
 
 /** How long saves during a game are held back and merged, so solving a problem never waits on storage. */
 const SAVE_DELAY_MS = 1000;
@@ -29,8 +30,12 @@ export class RunRecorder {
 	private readonly startPerf: number;
 	private saveTimer: number | null = null;
 
-	constructor(settings: GameSettings) {
+	/** Where problems come from; plain random generation unless a mode supplies its own source. */
+	private readonly source: () => GeneratedProblem;
+
+	constructor(settings: GameSettings, mode: GameMode = "normal", source?: () => GeneratedProblem) {
 		this.startPerf = performance.now();
+		this.source = source ?? (() => ({ problem: generateProblem(settings) }));
 		this.run = {
 			schemaVersion: 1,
 			id: newRunId(),
@@ -38,6 +43,7 @@ export class RunRecorder {
 			startedAt: Date.now(),
 			endedAt: null,
 			settings,
+			mode,
 			score: 0,
 			problems: [],
 			events: [],
@@ -70,10 +76,11 @@ export class RunRecorder {
 	}
 
 	private nextProblem(): Problem {
-		const problem = generateProblem(this.run.settings);
+		const { problem, targeted } = this.source();
 		this.run.problems.push({
 			index: this.run.problems.length,
 			...problem,
+			...(targeted === undefined ? {} : { targeted }),
 			shownAt: this.now(),
 			solvedAt: null,
 			inputs: [],
