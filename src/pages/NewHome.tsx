@@ -60,19 +60,19 @@ function NewHome() {
 			<p className="portnametext text-white" >Dorian Koch</p>
 			<div className={"container " + (makeTextTransparent ? "transitionout pe-none" : "transitionin")}>
 				<div className="d-flex flex-wrap justify-content-center row-gap-2">
-					<a href="https://github.com/dorian-k" className="social-link mx-2" title="Github">
+					<a href="https://github.com/dorian-k" target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="Github">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGithub} />
 						<span className="social-label">GitHub</span>
 					</a>
-					<a href="https://www.linkedin.com/in/dorian-koch-847851279" className="social-link mx-2" title="LinkedIn">
+					<a href="https://www.linkedin.com/in/dorian-koch-847851279" target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="LinkedIn">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faLinkedin} />
 						<span className="social-label">LinkedIn</span>
 					</a>
-					<a href="https://x.com/the_dorian_koch" className="social-link mx-2" title="X">
+					<a href="https://x.com/the_dorian_koch" target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="X">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faXTwitter} />
 						<span className="social-label">X</span>
 					</a>
-					<a href="https://scholar.google.com/citations?user=3XNe4AcAAAAJ" className="social-link mx-2" title="Google Scholar">
+					<a href="https://scholar.google.com/citations?user=3XNe4AcAAAAJ" target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="Google Scholar">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGoogleScholar} />
 						<span className="social-label">Scholar</span>
 					</a>
