@@ -76,7 +76,7 @@ h1, h2, h3 {
 .card-title-link {
 	color: inherit;
 	text-decoration: underline;
-	text-decoration-color: rgba(var(--bs-link-color-rgb), 0.5);
+	text-decoration-color: rgba(var(--bs-primary-rgb), 0.5);
 	text-decoration-thickness: 2px;
 	text-underline-offset: 0.2em;
 	transition: color 0.15s ease, text-decoration-color 0.15s ease;
