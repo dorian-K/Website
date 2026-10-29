@@ -89,7 +89,7 @@ function NewHome() {
 						View the utilization of the RWTH Aachen University gym over time and compare it with past data.
 					</Card>
 					<Card title="Game Jam 2026" href="/gamejam-2026/index.html">
-						Our team's winning entry from the 48h RWTH Game Jam 2026, hosted by the student council I/1.
+						Our team's winning entry for the 48h RWTH Game Jam 2026, hosted by the student council I/1.
 					</Card>
 					<h2 className="text-white mt-3">Other stuff</h2>
 					<Card title="AlphaProgression Gym Workout CSV Analyzer" to="/gym-analysis">
