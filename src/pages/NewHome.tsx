@@ -4,7 +4,6 @@ import { faGithub, faGoogleScholar, faLinkedin, faXTwitter } from "@fortawesome/
 import { faArrowRight, faRadio, faRightToBracket, faWaveSquare, faGraduationCap } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 import "./NewHome.scss";
-import { sketch2 } from "../sket";
 import { CV_PDF_URL } from "./CvPage";
 
 
