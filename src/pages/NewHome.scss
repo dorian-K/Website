@@ -166,10 +166,10 @@ h1, h2, h3 {
 	display: inline-flex;
 	align-items: center;
 	padding: 0.3rem 0.8rem;
-	border: 1px solid #5e574e;
+	border: 1px solid #8a8174;
 	border-radius: 0.5rem;
-	background: #36322e;
-	color: #f2ece1;
+	background: #4f4840;
+	color: #fff8ee;
 	font-weight: 600;
 	text-decoration: none;
 	transition: outline-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
@@ -177,16 +177,16 @@ h1, h2, h3 {
 	outline-offset: -1px;
 
 	.card-title-arrow {
-		color: var(--bs-link-color);
+		color: #8cb8ff;
 		font-size: 0.8em;
 		transition: transform 0.16s ease;
 	}
 
 	&:hover,
 	&:focus-visible {
-		color: #f2ece1;
+		color: #fff8ee;
 		text-decoration: none;
-		background: #3d3833;
+		background: #5a5249;
 		outline-color: rgba(var(--bs-primary-rgb), 0.7);
 		box-shadow: 0 0 0.9rem rgba(var(--bs-primary-rgb), 0.35);
 
