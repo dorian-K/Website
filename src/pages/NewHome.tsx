@@ -118,7 +118,7 @@ function NewHome() {
 								<FontAwesomeIcon className="whiteicon mx-1" icon={faRadio} />
 							</button>
 							<br />
-							<button type="button" className="btn btn-primary" onClick={() => { navigate("/b") }}>
+							<button type="button" className="btn btn-primary mb-2" onClick={() => { navigate("/b") }}>
 								Send links
 								<FontAwesomeIcon className="whiteicon mx-1" icon={faWaveSquare} />
 							</button>
