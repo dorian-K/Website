@@ -2,6 +2,41 @@ h1, h2, h3 {
 	font-family: "Roboto Mono", monospace;
 }
 
+// Warm charcoal colour scheme for the home page. #text covers the whole viewport,
+// so its background is the page background.
+.new-home {
+	background: #1a1917;
+	color: #ebe5da;
+
+	.portnametext,
+	.text-white {
+		color: #f2ece1 !important;
+	}
+
+	.whiteicon,
+	.social-link,
+	.social-link:hover,
+	.social-link:focus-visible,
+	.social-label {
+		color: #e3dccf;
+	}
+
+	.card {
+		--bs-card-bg: #2c2926;
+		--bs-card-color: #e6e0d5;
+		border-color: #45403a;
+		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+	}
+
+	.card-title {
+		color: #f5f0e6;
+	}
+
+	.card-body {
+		color: #d9d2c6;
+	}
+}
+
 .portnametext {
 	font-size: 6em;
 	font-family: "Roboto Mono", monospace;

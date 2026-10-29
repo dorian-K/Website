@@ -56,7 +56,7 @@ function NewHome() {
 
 
 	return (
-		<div id="text" style={{ display: "auto" }} className={makeTextTransparent ? "overflow-hidden" : ""}>
+		<div id="text" style={{ display: "auto" }} className={"new-home" + (makeTextTransparent ? " overflow-hidden" : "")}>
 			<p className="portnametext text-white" >Dorian Koch</p>
 			<div className={"container " + (makeTextTransparent ? "transitionout pe-none" : "transitionin")}>
 				<div className="d-flex flex-wrap justify-content-center row-gap-2">
