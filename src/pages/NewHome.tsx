@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+import { faGithub, faGoogleScholar, faLinkedin, faXTwitter } from "@fortawesome/free-brands-svg-icons";
 import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faDumbbell, faCalculator } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import "./NewHome.scss";
@@ -51,7 +51,7 @@ function NewHome() {
 		<div id="text" style={{ display: "auto" }} className={makeTextTransparent ? "overflow-hidden" : ""}>
 			<p className="portnametext text-white" >Dorian Koch</p>
 			<div className={"container " + (makeTextTransparent ? "transitionout pe-none" : "transitionin")}>
-				<div className="d-flex flex-nowrap justify-content-center">
+				<div className="d-flex flex-wrap justify-content-center row-gap-2">
 					<a href="https://github.com/dorian-k" className="social-link mx-2" title="Github">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGithub} />
 						<span className="social-label">GitHub</span>
@@ -59,6 +59,14 @@ function NewHome() {
 					<a href="https://www.linkedin.com/in/dorian-koch-847851279" className="social-link mx-2" title="LinkedIn">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faLinkedin} />
 						<span className="social-label">LinkedIn</span>
+					</a>
+					<a href="https://x.com/the_dorian_koch" className="social-link mx-2" title="X">
+						<FontAwesomeIcon className="whiteicon bigfont" icon={faXTwitter} />
+						<span className="social-label">X</span>
+					</a>
+					<a href="https://scholar.google.com/citations?user=3XNe4AcAAAAJ" className="social-link mx-2" title="Google Scholar">
+						<FontAwesomeIcon className="whiteicon bigfont" icon={faGoogleScholar} />
+						<span className="social-label">Scholar</span>
 					</a>
 					<button
 						type="button"
