@@ -36,14 +36,22 @@ h1, h2, h3 {
 	opacity: 0.85;
 	outline: 2px solid transparent;
 	outline-offset: -2px;
-	transition: transform 0.16s ease, opacity 0.16s ease, outline-color 0.16s ease, box-shadow 0.16s ease;
+	transition: opacity 0.16s ease, outline-color 0.16s ease, box-shadow 0.16s ease;
+
+	svg {
+		transition: transform 0.16s ease;
+	}
+
+	&:hover svg,
+	&:focus-visible svg {
+		transform: translateY(-3px);
+	}
 
 	&:hover,
 	&:focus-visible {
 		color: white;
 		text-decoration: none;
 		opacity: 1;
-		transform: translateY(-3px);
 		outline-color: rgba(var(--bs-primary-rgb), 0.7);
 		box-shadow: 0 0 0.9rem rgba(var(--bs-primary-rgb), 0.35);
 	}
