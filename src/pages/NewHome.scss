@@ -73,25 +73,46 @@ h1, h2, h3 {
 }
 
 
+// Cards whose title is a link: the link covers the whole card, which glows on hover.
+.card-linked {
+	position: relative;
+	outline: 2px solid transparent;
+	outline-offset: -2px;
+	transition: outline-color 0.16s ease, box-shadow 0.16s ease;
+
+	&:hover,
+	&:focus-within {
+		outline-color: rgba(var(--bs-primary-rgb), 0.7);
+		box-shadow: 0 0 0.9rem rgba(var(--bs-primary-rgb), 0.35);
+
+		.card-title-arrow {
+			transform: translateX(5px);
+		}
+	}
+}
+
 .card-title-link {
 	color: inherit;
 	text-decoration: underline;
 	text-underline-offset: 0.2em;
-	transition: color 0.15s ease;
+
+	&:hover,
+	&:focus-visible {
+		color: inherit;
+		outline: none;
+	}
+
+	// Stretch the click target over the whole card.
+	&::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+	}
 
 	.card-title-arrow {
 		color: var(--bs-link-color);
 		font-size: 0.8em;
-		transition: transform 0.15s ease;
-	}
-
-	&:hover,
-	&:focus-visible {
-		color: var(--bs-link-color);
-		text-decoration: underline;
-
-		.card-title-arrow {
-			transform: translateX(4px);
-		}
+		transition: transform 0.16s ease;
 	}
 }

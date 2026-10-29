@@ -20,7 +20,7 @@ function Card(props: { title?: any, text?: any, children?: any, size?: number, t
 		title = <a className="card-title-link" href={props.href} {...(props.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{titleContent}</a>;
 	}
 	return (<div className={"col-md-" + (props.size ?? 8) + " my-1"}>
-		<div className="card mx-1">
+		<div className={"card mx-1" + (props.to || props.href ? " card-linked" : "")}>
 			<div className="card-body text-start">
 				<h5 className="card-title">
 					{title}
