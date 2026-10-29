@@ -433,6 +433,10 @@ function GymWorkoutAnalyzer() {
 	const [selectedExercise, setSelectedExercise] = useState<string>("");
 	const [progressMetric, setProgressMetric] = useState<"maxWeight" | "estimatedOneRm">("maxWeight");
 
+	useEffect(() => {
+		document.title = "Gym Workout Analyzer - Dorian Koch";
+	}, []);
+
 	const parsed = useMemo(() => {
 		if (!rawCsv) {
 			return null;
