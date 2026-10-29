@@ -52,27 +52,31 @@ function NewHome() {
 			<p className="portnametext text-white" >Dorian Koch</p>
 			<div className={"container " + (makeTextTransparent ? "transitionout pe-none" : "transitionin")}>
 				<div className="d-flex flex-nowrap justify-content-center">
-					<a href="https://github.com/dorian-k" className="mx-2" title="Github">
+					<a href="https://github.com/dorian-k" className="social-link mx-2" title="Github">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGithub} />
+						<span className="social-label">GitHub</span>
 					</a>
-					<a href="https://www.linkedin.com/in/dorian-koch-847851279" className="mx-2" title="LinkedIn">
+					<a href="https://www.linkedin.com/in/dorian-koch-847851279" className="social-link mx-2" title="LinkedIn">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faLinkedin} />
+						<span className="social-label">LinkedIn</span>
 					</a>
 					<button
 						type="button"
-						className="btn btn-link p-0 mx-2"
+						className="social-link btn btn-link p-0 mx-2"
 						title="Curriculum Vitae"
 						onClick={openCV}
 					>
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGraduationCap} />
+						<span className="social-label">CV</span>
 					</button>
 					<button
 						type="button"
-						className="btn btn-link p-0 mx-2"
+						className="social-link btn btn-link p-0 mx-2"
 						title="Projects"
 						onClick={() => navigate("/projects")}
 					>
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faFolderOpen} />
+						<span className="social-label">Projects</span>
 					</button>
 				</div>
 				<div className="d-flex flex-column align-items-center mt-3 w-100">
