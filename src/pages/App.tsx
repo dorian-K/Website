@@ -7,7 +7,6 @@ import CvPage from "./CvPage";
 
 // Everything except the home page is loaded on demand, so the home page doesn't
 // download the charting, math and simulation code of the other pages.
-const Portfolio = React.lazy(() => import("./Home"));
 const Acceptor = React.lazy(() => import("../experiments/redirector/Acceptor"));
 const Sender = React.lazy(() => import("../experiments/redirector/Sender"));
 const GeneticSim = React.lazy(() => import("../experiments/genetics/GeneticSim"));
@@ -25,8 +24,7 @@ function App() {
 						<Route path="/g" element={<GeneticSim />} />
 						<Route path="/gr" element={<WasmGeneticSim />} />
 						<Route path="/" element={<Strict><NewHome /></Strict>} />
-						<Route path="/oldhome" element={<Strict><Portfolio /></Strict>} />
-						<Route path="/a" element={<Strict><Acceptor /></Strict>} />
+							<Route path="/a" element={<Strict><Acceptor /></Strict>} />
 						<Route path="/b" element={<Strict><Sender /></Strict>} />
 						<Route path="/cv" element={<Strict><CvPage /></Strict>} />
 						<Route path="/gym-analysis" element={<Strict><GymWorkoutAnalyzer /></Strict>} />
