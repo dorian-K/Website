@@ -40,15 +40,12 @@ h1, h2, h3 {
 
 	&:hover,
 	&:focus-visible {
+		color: white;
+		text-decoration: none;
 		opacity: 1;
 		transform: translateY(-3px);
 		outline-color: rgba(var(--bs-primary-rgb), 0.7);
 		box-shadow: 0 0 0.9rem rgba(var(--bs-primary-rgb), 0.35);
-	}
-
-	&:hover .social-label,
-	&:focus-visible .social-label {
-		text-decoration: underline;
 	}
 }
 
