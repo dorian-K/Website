@@ -394,7 +394,7 @@ function LineChart(props: { data: ExerciseProgressPoint[]; title: string; unit: 
 				},
 			},
 			y: {
-				formatter: (value) => `${formatNumber(value, 1)} ${unit}`,
+				formatter: (value) => (value == null ? "" : `${formatNumber(value, 1)} ${unit}`),
 				title: { formatter: () => "" },
 			},
 			custom: ({ series, seriesIndex, dataPointIndex }) => {
