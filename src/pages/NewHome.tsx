@@ -1,19 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faGoogleScholar, faLinkedin, faXTwitter } from "@fortawesome/free-brands-svg-icons";
-import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faDumbbell, faCalculator } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
+import { faArrowRight, faRadio, faRightToBracket, faWaveSquare, faGraduationCap } from "@fortawesome/free-solid-svg-icons";
+import { Link, useNavigate } from "react-router-dom";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
 import { CV_PDF_URL } from "./CvPage";
 
 
-function Card(props: { title?: any, text?: any, children?: any, size?: number }) {
+function Card(props: { title?: any, text?: any, children?: any, size?: number, to?: string, href?: string, newTab?: boolean }) {
+	const titleContent = <>
+		{props.title}
+		<FontAwesomeIcon className="card-title-arrow ms-2" icon={faArrowRight} />
+	</>;
+	let title = props.title;
+	if (props.to) {
+		title = <Link className="card-title-link" to={props.to}>{titleContent}</Link>;
+	} else if (props.href) {
+		title = <a className="card-title-link" href={props.href} {...(props.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{titleContent}</a>;
+	}
 	return (<div className={"col-md-" + (props.size ?? 8) + " my-1"}>
 		<div className="card mx-1">
 			<div className="card-body text-start">
 				<h5 className="card-title">
-					{props.title}
+					{title}
 				</h5>
 				<p className="card-text">
 					{props.text}
@@ -80,52 +90,20 @@ function NewHome() {
 					</button>
 				</div>
 				<div className="d-flex flex-column align-items-center mt-3 w-100">
-					<Card title="Curriculum Vitae" >
-						<div>
-							<button type="button" className="btn btn-primary mb-2 me-2" onClick={openCV}>
-								Open CV
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faGraduationCap} />
-							</button>
-						</div>
+					<Card title="Curriculum Vitae" href={CV_PDF_URL} newTab>
 						View my curriculum vitae, including education, work experience, skills, and projects.
-						Click "Open CV" to view the PDF in a new tab.
 					</Card>
-					<Card title="RWTH Gym Tracker" >
-						<div>
-							<a className="btn btn-primary mb-2 me-2" href="https://rwtf.dorianko.ch/">
-								Open
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
-							</a>
-						</div>
+					<Card title="RWTH Gym Tracker" href="https://rwtf.dorianko.ch/">
 						View the utilization of the RWTH Aachen University gym over time and compare it with past data.
 					</Card>
-					<Card title="Game Jam 2026" >
-						<div>
-							<a className="btn btn-primary mb-2 me-2" href="/gamejam-2026/index.html">
-								Open
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
-							</a>
-						</div>
+					<Card title="Game Jam 2026" href="/gamejam-2026/index.html">
 						I was part of the winning team for the 48h Game Jam 2026 contest, hosted by the student council I/1 at RWTH Aachen University.
-						Click "Open" to play the game in your browser.
 					</Card>
 					<h2 className="text-white mt-3">Other stuff</h2>
-					<Card title="AlphaProgression Gym Workout CSV Analyzer" >
-						<div>
-							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => navigate("/gym-analysis")}>
-								Open
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faDumbbell} />
-							</button>
-						</div>
+					<Card title="AlphaProgression Gym Workout CSV Analyzer" to="/gym-analysis">
 						Drop in a CSV export of your AlphaProgression workouts and get in-browser analysis of sets, reps, duration, volume, and exercise trends.
 					</Card>
-					<Card title="Arithmetic Speed Drill" >
-						<div>
-							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => navigate("/arithmetic")}>
-								Play
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faCalculator} />
-							</button>
-						</div>
+					<Card title="Arithmetic Speed Drill" to="/arithmetic">
 						A copy of the Zetamac arithmetic game, with additional stats for learning.
 					</Card>
 					<Card title="Visualizations I made">
