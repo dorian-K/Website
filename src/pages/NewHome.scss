@@ -74,8 +74,9 @@ h1, h2, h3 {
 
 
 .card-title-link {
-	color: inherit;
-	text-decoration: none;
+	color: var(--bs-link-color);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
 
 	.card-title-arrow {
 		font-size: 0.8em;
@@ -84,7 +85,7 @@ h1, h2, h3 {
 
 	&:hover,
 	&:focus-visible {
-		text-decoration: underline;
+		color: var(--bs-link-hover-color);
 
 		.card-title-arrow {
 			transform: translateX(4px);
