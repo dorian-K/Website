@@ -26,7 +26,7 @@ There is no test or lint script. The `jest` block in `package.json`, `.babelrc`,
   - `src/experiments/genetics/` — pure TS implementation (`/g`).
   - `src/experiments/genetics_rust/` — Rust port compiled to wasm (`/gr`). `WasmGeneticSim.tsx` spawns `GeneticWebWorker.tsx` as a module Web Worker (`new Worker(new URL(...), import.meta.url)`) and talks to it via Comlink; the worker loads the wasm `NodeManager` and returns node state per tick for p5 to draw.
 - `vite.config.ts` sets COOP/COEP headers on the dev server (cross-origin isolation for SharedArrayBuffer/wasm threads).
-- GitHub data: `CvPage.tsx` fetches from `api.github.com` client-side.
+- `/cv` (`CvPage.tsx`) just redirects to the CV PDF in the `dorian-K/cv` repo; `CV_PDF_URL` there is also used by the home page.
 - `GymWorkoutAnalyzer.tsx` is a self-contained page that parses uploaded workout exports in the browser and charts them with ApexCharts.
 
 ## Deployment

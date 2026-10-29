@@ -5,6 +5,7 @@ import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faDumbbell, f
 import { useNavigate } from "react-router-dom";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
+import { CV_PDF_URL } from "./CvPage";
 
 
 function Card(props: { title?: any, text?: any, children?: any, size?: number }) {
@@ -44,7 +45,7 @@ function NewHome() {
 	}, [makeTextTransparent])
 
 	const openCV = () => {
-		window.open("https://raw.githubusercontent.com/dorian-K/cv/main/cv_dorian_koch.pdf", "_blank");
+		window.open(CV_PDF_URL, "_blank");
 	};
 
 	return (
