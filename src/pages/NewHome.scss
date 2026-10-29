@@ -58,15 +58,19 @@ h1, h2, h3 {
 }
 
 .social-label {
-	display: inline-flex;
-	align-items: center;
+	position: relative;
 	margin-top: 0.25em;
 	font-size: 0.8rem;
 	color: white;
 	text-decoration: none;
 
-	// Small "opens in a new tab" marker after the label.
+	// Small "opens in a new tab" marker after the label. Positioned absolutely so the
+	// label text itself stays centred under the icon.
 	.social-newtab {
+		position: absolute;
+		left: 100%;
+		top: 50%;
+		transform: translateY(-50%);
 		margin-left: 0.3em;
 		font-size: 0.7em;
 		opacity: 0.7;
