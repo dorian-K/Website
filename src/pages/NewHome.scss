@@ -28,16 +28,22 @@ h1, h2, h3 {
 	flex-direction: column;
 	align-items: center;
 	min-width: 4.5em;
+	padding: 0.4em 0.5em;
+	border-radius: 0.5rem;
 	color: white;
 	text-decoration: none;
 	cursor: pointer;
 	opacity: 0.85;
-	transition: transform 0.15s ease, opacity 0.15s ease;
+	outline: 2px solid transparent;
+	outline-offset: -2px;
+	transition: transform 0.16s ease, opacity 0.16s ease, outline-color 0.16s ease, box-shadow 0.16s ease;
 
 	&:hover,
 	&:focus-visible {
 		opacity: 1;
 		transform: translateY(-3px);
+		outline-color: rgba(var(--bs-primary-rgb), 0.7);
+		box-shadow: 0 0 0.9rem rgba(var(--bs-primary-rgb), 0.35);
 	}
 
 	&:hover .social-label,

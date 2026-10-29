@@ -54,9 +54,6 @@ function NewHome() {
 		}
 	}, [makeTextTransparent])
 
-	const openCV = () => {
-		window.open(CV_PDF_URL, "_blank");
-	};
 
 	return (
 		<div id="text" style={{ display: "auto" }} className={makeTextTransparent ? "overflow-hidden" : ""}>
@@ -79,15 +76,10 @@ function NewHome() {
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGoogleScholar} />
 						<span className="social-label">Scholar</span>
 					</a>
-					<button
-						type="button"
-						className="social-link btn btn-link p-0 mx-2"
-						title="Curriculum Vitae"
-						onClick={openCV}
-					>
+					<a href={CV_PDF_URL} target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="Curriculum Vitae">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGraduationCap} />
 						<span className="social-label">CV</span>
-					</button>
+					</a>
 				</div>
 				<div className="d-flex flex-column align-items-center mt-3 w-100">
 					<Card title="Curriculum Vitae" href={CV_PDF_URL} newTab>
