@@ -346,7 +346,7 @@ function LineChart(props: { data: ExerciseProgressPoint[]; title: string; unit: 
 			toolbar: { show: false },
 			zoom: { enabled: true },
 			background: "transparent",
-			foreColor: "rgba(255,255,255,0.7)",
+			foreColor: "rgba(235,229,218,0.7)",
 		},
 		stroke: {
 			curve: "smooth",
@@ -359,7 +359,7 @@ function LineChart(props: { data: ExerciseProgressPoint[]; title: string; unit: 
 			hover: { sizeOffset: 2 },
 		},
 		grid: {
-			borderColor: "rgba(255,255,255,0.08)",
+			borderColor: "rgba(235,229,218,0.08)",
 			strokeDashArray: 4,
 			padding: {
 				left: 10,
@@ -371,17 +371,17 @@ function LineChart(props: { data: ExerciseProgressPoint[]; title: string; unit: 
 			labels: {
 				datetimeUTC: false,
 				style: {
-					colors: "rgba(255,255,255,0.55)",
+					colors: "rgba(235,229,218,0.55)",
 				},
 			},
-			axisBorder: { color: "rgba(255,255,255,0.1)" },
-			axisTicks: { color: "rgba(255,255,255,0.1)" },
+			axisBorder: { color: "rgba(235,229,218,0.1)" },
+			axisTicks: { color: "rgba(235,229,218,0.1)" },
 		},
 		yaxis: {
 			labels: {
 				formatter: (value) => `${formatNumber(value, 1)} ${unit}`,
 				style: {
-					colors: ["rgba(255,255,255,0.55)"],
+					colors: ["rgba(235,229,218,0.55)"],
 				},
 			},
 		},
@@ -587,7 +587,7 @@ function GymWorkoutAnalyzer() {
 	};
 
 	return (
-		<div className="gym-analyzer-page text-white">
+		<div className="gym-analyzer-page">
 			<div className="container">
 				<header className="gym-toolbar">
 					<div>
