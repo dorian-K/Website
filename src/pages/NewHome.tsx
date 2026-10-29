@@ -132,9 +132,7 @@ function NewHome() {
 							</button>
 						</div>
 
-						<br />
-						One page displays a <b>QR code</b>, while the second page allows you to input an URL.
-						<br /><b> Scan the QR code with your phone</b>, enter the URL on the second page, and click "Submit" to view the web page on the big screen.
+						Show a <b>QR code</b> on a big screen, scan it with your phone, and send it a link to open.
 					</Card>
 					<Card title="Genetic Simulation in your Browser">
 						<div>
