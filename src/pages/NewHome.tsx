@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
-import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faFolderOpen, faDumbbell, faCalculator } from "@fortawesome/free-solid-svg-icons";
+import { faRadio, faRightToBracket, faWaveSquare, faGraduationCap, faDumbbell, faCalculator } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
@@ -44,7 +44,7 @@ function NewHome() {
 	}, [makeTextTransparent])
 
 	const openCV = () => {
-		window.open("https://raw.githubusercontent.com/dorian-K/cv/main/cv_english.pdf", "_blank");
+		window.open("https://raw.githubusercontent.com/dorian-K/cv/main/cv_dorian_koch.pdf", "_blank");
 	};
 
 	return (
@@ -68,15 +68,6 @@ function NewHome() {
 					>
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGraduationCap} />
 						<span className="social-label">CV</span>
-					</button>
-					<button
-						type="button"
-						className="social-link btn btn-link p-0 mx-2"
-						title="Projects"
-						onClick={() => navigate("/projects")}
-					>
-						<FontAwesomeIcon className="whiteicon bigfont" icon={faFolderOpen} />
-						<span className="social-label">Projects</span>
 					</button>
 				</div>
 				<div className="d-flex flex-column align-items-center mt-3 w-100">
@@ -171,15 +162,6 @@ function NewHome() {
 						</div>
 						Train a neural network to follow a red circle using a <b>Genetic Algorithm</b>.
 						The <b>WASM</b> version uses WebAssembly.
-					</Card>
-					<Card title="GitHub Projects">
-						<div>
-							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => { navigate("/projects") }}>
-								View Projects
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
-							</button>
-						</div>
-						Browse my public GitHub repositories, sorted by stars. Includes descriptions, languages, and metrics.
 					</Card>
 				</div>
 			</div>

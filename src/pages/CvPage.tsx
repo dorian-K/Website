@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const CV_PDF_URL = "https://raw.githubusercontent.com/dorian-K/cv/main/cv_english.pdf";
+const CV_PDF_URL = "https://raw.githubusercontent.com/dorian-K/cv/main/cv_dorian_koch.pdf";
 const CV_GERMAN_URL = "https://raw.githubusercontent.com/dorian-K/cv/main/cv_german.pdf";
 const CV_REPO_URL = "https://github.com/dorian-K/cv";
 const GITHUB_API_URL = "https://api.github.com/repos/dorian-K/cv/commits?per_page=1";

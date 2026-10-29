@@ -18,7 +18,7 @@ There is no test or lint script. The `jest` block in `package.json`, `.babelrc`,
 
 ## Architecture
 
-- Entry: `index.html` → `src/index.tsx` → `src/pages/App.tsx`, which defines all routes with `react-router-dom` (`/` NewHome, `/cv`, `/projects`, `/gym-analysis`, `/sims/*`, plus experiment routes `/g`, `/gr`, `/a`, `/b`, `/oldhome`). Most routes are wrapped in `<React.StrictMode>`; the genetic sim routes deliberately are not.
+- Entry: `index.html` → `src/index.tsx` → `src/pages/App.tsx`, which defines all routes with `react-router-dom` (`/` NewHome, `/cv`, `/gym-analysis`, `/sims/*`, plus experiment routes `/g`, `/gr`, `/a`, `/b`, `/oldhome`). Most routes are wrapped in `<React.StrictMode>`; the genetic sim routes deliberately are not.
 - Styling: Bootstrap is loaded globally from `public/assets/` via `<link>`/`<script>` in `index.html` (so Bootstrap class names are used throughout), plus per-page CSS/SCSS. `src/bootstrapp/` is a vendored copy.
 - `index.html` contains a Content-Security-Policy meta tag. Any new external origin (fetch, script, font, iframe) must be added there or it will be blocked. `unsafe-eval` is required by the mathjs-based `/sims/graph` page.
 - p5.js visualizations: `src/sket.tsx` exports the p5 sketches (`sketch2` = n-body planet sim, `makeSketch(math)` = expression graph). `src/pages/Sims.tsx` renders them via lazily loaded `@p5-wrapper/react`, with mathjs dynamically imported.
@@ -26,7 +26,7 @@ There is no test or lint script. The `jest` block in `package.json`, `.babelrc`,
   - `src/experiments/genetics/` — pure TS implementation (`/g`).
   - `src/experiments/genetics_rust/` — Rust port compiled to wasm (`/gr`). `WasmGeneticSim.tsx` spawns `GeneticWebWorker.tsx` as a module Web Worker (`new Worker(new URL(...), import.meta.url)`) and talks to it via Comlink; the worker loads the wasm `NodeManager` and returns node state per tick for p5 to draw.
 - `vite.config.ts` sets COOP/COEP headers on the dev server (cross-origin isolation for SharedArrayBuffer/wasm threads).
-- GitHub data: `ProjectsSection.tsx` and `CvPage.tsx` fetch from `api.github.com` client-side.
+- GitHub data: `CvPage.tsx` fetches from `api.github.com` client-side.
 - `GymWorkoutAnalyzer.tsx` is a self-contained page that parses uploaded workout exports in the browser and charts them with ApexCharts.
 
 ## Deployment

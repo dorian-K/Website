@@ -9,7 +9,6 @@ import NewHome from "./NewHome";
 import React from "react";
 import WasmGeneticSim from "../experiments/genetics_rust/js/WasmGeneticSim";
 import CvPage from "./CvPage";
-import ProjectsPage from "./ProjectsPage";
 import GymWorkoutAnalyzer from "./GymWorkoutAnalyzer";
 import ArithmeticGame from "./ArithmeticGame";
 
@@ -27,7 +26,6 @@ function App() {
 					<Route path="/a" element={<Strict><Acceptor /></Strict>} />
 					<Route path="/b" element={<Strict><Sender /></Strict>} />
 					<Route path="/cv" element={<Strict><CvPage /></Strict>} />
-					<Route path="/projects" element={<Strict><ProjectsPage /></Strict>} />
 					<Route path="/gym-analysis" element={<Strict><GymWorkoutAnalyzer /></Strict>} />
 					<Route path="/arithmetic" element={<Strict><ArithmeticGame /></Strict>} />
 
