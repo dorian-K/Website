@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faGoogleScholar, faLinkedin, faXTwitter } from "@fortawesome/free-brands-svg-icons";
-import { faArrowRight, faRadio, faRightToBracket, faWaveSquare, faGraduationCap } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faArrowUpRightFromSquare, faRadio, faRightToBracket, faWaveSquare, faGraduationCap } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 import "./NewHome.scss";
 import { sketch2 } from "../sket";
@@ -62,23 +62,23 @@ function NewHome() {
 				<div className="d-flex flex-wrap justify-content-center row-gap-2">
 					<a href="https://github.com/dorian-k" target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="Github">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGithub} />
-						<span className="social-label">GitHub</span>
+						<span className="social-label">GitHub<FontAwesomeIcon className="social-newtab" icon={faArrowUpRightFromSquare} /></span>
 					</a>
 					<a href="https://www.linkedin.com/in/dorian-koch-847851279" target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="LinkedIn">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faLinkedin} />
-						<span className="social-label">LinkedIn</span>
+						<span className="social-label">LinkedIn<FontAwesomeIcon className="social-newtab" icon={faArrowUpRightFromSquare} /></span>
 					</a>
 					<a href="https://x.com/the_dorian_koch" target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="X">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faXTwitter} />
-						<span className="social-label">X</span>
+						<span className="social-label">X<FontAwesomeIcon className="social-newtab" icon={faArrowUpRightFromSquare} /></span>
 					</a>
 					<a href="https://scholar.google.com/citations?user=3XNe4AcAAAAJ" target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="Google Scholar">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGoogleScholar} />
-						<span className="social-label">Scholar</span>
+						<span className="social-label">Scholar<FontAwesomeIcon className="social-newtab" icon={faArrowUpRightFromSquare} /></span>
 					</a>
 					<a href={CV_PDF_URL} target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="Curriculum Vitae">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGraduationCap} />
-						<span className="social-label">CV</span>
+						<span className="social-label">CV<FontAwesomeIcon className="social-newtab" icon={faArrowUpRightFromSquare} /></span>
 					</a>
 				</div>
 				<div className="d-flex flex-column align-items-center mt-3 w-100">

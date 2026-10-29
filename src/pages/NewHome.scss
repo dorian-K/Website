@@ -38,12 +38,12 @@ h1, h2, h3 {
 	outline-offset: -2px;
 	transition: opacity 0.16s ease, outline-color 0.16s ease, box-shadow 0.16s ease;
 
-	svg {
+	> svg {
 		transition: transform 0.16s ease;
 	}
 
-	&:hover svg,
-	&:focus-visible svg {
+	&:hover > svg,
+	&:focus-visible > svg {
 		transform: translateY(-3px);
 	}
 
@@ -58,10 +58,19 @@ h1, h2, h3 {
 }
 
 .social-label {
+	display: inline-flex;
+	align-items: center;
 	margin-top: 0.25em;
 	font-size: 0.8rem;
 	color: white;
 	text-decoration: none;
+
+	// Small "opens in a new tab" marker after the label.
+	.social-newtab {
+		margin-left: 0.3em;
+		font-size: 0.7em;
+		opacity: 0.7;
+	}
 }
 
 @keyframes fadetranspin {
