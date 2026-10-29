@@ -39,6 +39,8 @@ h1, h2, h3 {
 
 .portnametext {
 	font-size: 6em;
+	font-weight: 400;
+	line-height: 1.6;
 	font-family: "Roboto Mono", monospace;
 	margin-top: 1vh;
     margin-bottom: 0;
@@ -103,19 +105,9 @@ h1, h2, h3 {
 	from { opacity: 0.1; }
 	to   { opacity: 1; }
   }
-@keyframes fadetranspout {
-	from { opacity: 1; }
-	to   { opacity: 0.1; }
-  }
-
 .transitionin {
 	animation: fadetranspin 0.3s ease-in-out;
 	opacity: 1;
-}
-
-.transitionout {
-	animation: fadetranspout 0.3s ease-in-out;
-	opacity: 0.0;
 }
 
 
@@ -160,5 +152,46 @@ h1, h2, h3 {
 		color: var(--bs-link-color);
 		font-size: 0.8em;
 		transition: transform 0.16s ease;
+	}
+}
+
+.card-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+// Buttons for cards that lead to more than one page; they glow like the linked cards.
+.card-sublink {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.3rem 0.8rem;
+	border: 1px solid #5e574e;
+	border-radius: 0.5rem;
+	background: #36322e;
+	color: #f2ece1;
+	font-weight: 600;
+	text-decoration: none;
+	transition: outline-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+	outline: 2px solid transparent;
+	outline-offset: -1px;
+
+	.card-title-arrow {
+		color: var(--bs-link-color);
+		font-size: 0.8em;
+		transition: transform 0.16s ease;
+	}
+
+	&:hover,
+	&:focus-visible {
+		color: #f2ece1;
+		text-decoration: none;
+		background: #3d3833;
+		outline-color: rgba(var(--bs-primary-rgb), 0.7);
+		box-shadow: 0 0 0.9rem rgba(var(--bs-primary-rgb), 0.35);
+
+		.card-title-arrow {
+			transform: translateX(4px);
+		}
 	}
 }

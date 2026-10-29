@@ -1,63 +1,64 @@
-import React, { useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faGoogleScholar, faLinkedin, faXTwitter } from "@fortawesome/free-brands-svg-icons";
-import { faArrowRight, faRadio, faRightToBracket, faWaveSquare, faGraduationCap } from "@fortawesome/free-solid-svg-icons";
-import { Link, useNavigate } from "react-router-dom";
+import { faArrowRight, faGraduationCap } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
 import "./NewHome.scss";
 import { CV_PDF_URL } from "./CvPage";
 
+interface CardProps {
+	title: ReactNode;
+	children?: ReactNode;
+	// The title links to `to` (an app route) or `href` (any URL), and the whole card becomes clickable.
+	to?: string;
+	href?: string;
+	newTab?: boolean;
+}
 
-function Card(props: { title?: any, text?: any, children?: any, size?: number, to?: string, href?: string, newTab?: boolean }) {
+function Card(props: CardProps) {
 	const titleContent = <>
 		{props.title}
 		<FontAwesomeIcon className="card-title-arrow ms-2" icon={faArrowRight} />
 	</>;
-	let title = props.title;
+	let title: ReactNode = props.title;
 	if (props.to) {
 		title = <Link className="card-title-link" to={props.to}>{titleContent}</Link>;
 	} else if (props.href) {
 		title = <a className="card-title-link" href={props.href} {...(props.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{titleContent}</a>;
 	}
-	return (<div className={"col-md-" + (props.size ?? 8) + " my-1"}>
+	return (<div className="col-md-8 my-1">
 		<div className={"card mx-1" + (props.to || props.href ? " card-linked" : "")}>
 			<div className="card-body text-start">
 				<h5 className="card-title">
 					{title}
 				</h5>
-				<p className="card-text">
-					{props.text}
-				</p>
 				{props.children}
 			</div>
 		</div>
+	</div>);
+}
 
-
+// A row of links for cards that lead to more than one page.
+function CardLinks(props: { links: { label: string, to: string }[] }) {
+	return (<div className="card-links mb-2">
+		{props.links.map(link => (
+			<Link key={link.to} className="card-sublink" to={link.to}>
+				{link.label}
+				<FontAwesomeIcon className="card-title-arrow ms-1" icon={faArrowRight} />
+			</Link>
+		))}
 	</div>);
 }
 
 function NewHome() {
-	let [myExpression, setMyExpression] = useState("sin(t + x * y * 0.2)");
-
 	useEffect(() => {
-		document.title = "Dorian Koch - Portfolio"
-	}, [])
-
-	const navigate = useNavigate();
-	const [makeTextTransparent, setMakeTextTransparent] = useState(false);
-
-
-	// when makeTextTransparent is true, scroll will be disabled, so make sure to scroll to top
-	useEffect(() => {
-		if (makeTextTransparent) {
-			document.getElementById("text")!.scrollTo(0, 0);
-		}
-	}, [makeTextTransparent])
-
+		document.title = "Dorian Koch";
+	}, []);
 
 	return (
-		<div id="text" style={{ display: "auto" }} className={"new-home" + (makeTextTransparent ? " overflow-hidden" : "")}>
-			<p className="portnametext text-white" >Dorian Koch</p>
-			<div className={"container " + (makeTextTransparent ? "transitionout pe-none" : "transitionin")}>
+		<div id="text" className="new-home">
+			<h1 className="portnametext text-white">Dorian Koch</h1>
+			<div className="container transitionin">
 				<div className="d-flex flex-wrap justify-content-center row-gap-2">
 					<a href="https://github.com/dorian-k" target="_blank" rel="noopener noreferrer" className="social-link mx-2" title="Github">
 						<FontAwesomeIcon className="whiteicon bigfont" icon={faGithub} />
@@ -98,46 +99,16 @@ function NewHome() {
 						A copy of the Zetamac arithmetic game, with additional stats for learning.
 					</Card>
 					<Card title="Visualizations I made">
-						<div>
-							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => { navigate("/sims/planets") }}>
-								Planets
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
-							</button>
-							<button type="button" className="btn btn-primary mb-2" onClick={() => { navigate("/sims/graph") }}>
-								Graph
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
-							</button>
-						</div>
-
+						<CardLinks links={[{ label: "Planets", to: "/sims/planets" }, { label: "Graph", to: "/sims/graph" }]} />
+						A gravity simulation of orbiting planets, and an animated plot of any formula in x, y and time.
 					</Card>
 					<Card title="Send & Receive links via QR code">
-						<div>
-							<button type="button" className="btn btn-primary mb-2" onClick={() => { navigate("/a") }}>
-								Receive links
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faRadio} />
-							</button>
-							<br />
-							<button type="button" className="btn btn-primary mb-2" onClick={() => { navigate("/b") }}>
-								Send links
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faWaveSquare} />
-							</button>
-						</div>
-
+						<CardLinks links={[{ label: "Receive links", to: "/a" }, { label: "Send links", to: "/b" }]} />
 						Show a <b>QR code</b> on a big screen, scan it with your phone, and send it a link to open.
 					</Card>
 					<Card title="Genetic Simulation in your Browser">
-						<div>
-							<button type="button" className="btn btn-primary mb-2 me-2" onClick={() => { navigate("/g") }}>
-								Open
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
-							</button>
-							<button type="button" className="btn btn-primary mb-2" onClick={() => { navigate("/gr") }}>
-								Open WASM
-								<FontAwesomeIcon className="whiteicon mx-1" icon={faRightToBracket} />
-							</button>
-						</div>
-						Train a neural network to follow a red circle using a <b>Genetic Algorithm</b>.
-						The <b>WASM</b> version uses WebAssembly.
+						<CardLinks links={[{ label: "TypeScript", to: "/g" }, { label: "WebAssembly", to: "/gr" }]} />
+						Train a neural network to follow a red circle using a <b>Genetic Algorithm</b>, in TypeScript or as Rust compiled to WebAssembly.
 					</Card>
 				</div>
 			</div>
