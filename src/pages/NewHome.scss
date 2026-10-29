@@ -76,16 +76,11 @@ h1, h2, h3 {
 .card-title-link {
 	color: inherit;
 	text-decoration: underline;
-	text-decoration-color: rgba(var(--bs-primary-rgb), 0.5);
-	text-decoration-thickness: 2px;
 	text-underline-offset: 0.2em;
-	transition: color 0.15s ease, text-decoration-color 0.15s ease;
+	transition: color 0.15s ease;
 
 	.card-title-arrow {
 		color: var(--bs-link-color);
-	}
-
-	.card-title-arrow {
 		font-size: 0.8em;
 		transition: transform 0.15s ease;
 	}
@@ -93,7 +88,7 @@ h1, h2, h3 {
 	&:hover,
 	&:focus-visible {
 		color: var(--bs-link-color);
-		text-decoration-color: currentColor;
+		text-decoration: underline;
 
 		.card-title-arrow {
 			transform: translateX(4px);
